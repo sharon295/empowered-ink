@@ -50,7 +50,9 @@ export async function POST(req: Request) {
   const coverImageUrl = await uploadCoverImage(buffer, coverImage.type);
 
   const wantsFeatured = data.isFeatured;
-  const wantsAddon = data.addCategories && data.secondaryCategories.length > 0;
+  // Featured already bundles all 3 categories for free, so the paid add-on
+  // only applies to a Standard listing.
+  const wantsAddon = data.addCategories && data.secondaryCategories.length > 0 && !wantsFeatured;
 
   const book = await prisma.book.create({
     data: {

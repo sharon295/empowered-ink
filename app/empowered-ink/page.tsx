@@ -112,6 +112,7 @@ export default async function EmpoweredInkPage() {
               <ul className="flex flex-col gap-2.5">
                 {[
                   "Upgraded, larger cover image",
+                  "All 3 categories included, free",
                   "Top-of-page placement above standard listings",
                   "75–100 word author & book description",
                   "Runs through the end of the current month, then automatically moves into the standard directory",
@@ -130,7 +131,7 @@ export default async function EmpoweredInkPage() {
             </div>
 
             <div className="flex flex-col gap-4 bg-midnight-plum p-7">
-              <div className="text-[11px] uppercase tracking-wider text-champagne-gold-light">Add-on</div>
+              <div className="text-[11px] uppercase tracking-wider text-champagne-gold-light">Add-on for Standard listings</div>
               <h3 className="font-display text-[24px] font-medium text-warm-white">Category Placement</h3>
               <div className="font-display text-[34px] text-champagne-gold-light">
                 $35 <span className="font-body text-[13px] text-warm-white/50">/ up to 2 extra categories</span>
@@ -139,8 +140,8 @@ export default async function EmpoweredInkPage() {
                 {[
                   "Every listing includes 1 free primary category",
                   "Add up to 2 more for $35 (3 total)",
+                  "Included automatically if you choose Featured instead",
                   "Makes your book easier to discover by genre",
-                  "Stack with Standard or Featured listings",
                 ].map((li) => (
                   <li key={li} className="flex gap-2.5 text-[13px] leading-relaxed text-warm-white/75">
                     <span className="font-bold text-champagne-gold-light">✓</span> {li}

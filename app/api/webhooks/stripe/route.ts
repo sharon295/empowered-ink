@@ -27,7 +27,10 @@ export async function POST(req: Request) {
       await prisma.book.update({
         where: { id: bookId },
         data: {
-          ...(featured ? { isFeatured: true, featuredUntil: lastDayOfCurrentMonth() } : {}),
+          // Featured bundles all 3 categories for free, so it also unlocks
+          // categoryAddonPaid; categoryAddon is the separate $35 path for a
+          // Standard listing (mutually exclusive with featured, see /api/submit).
+          ...(featured ? { isFeatured: true, featuredUntil: lastDayOfCurrentMonth(), categoryAddonPaid: true } : {}),
           ...(categoryAddon ? { categoryAddonPaid: true } : {}),
         },
       });

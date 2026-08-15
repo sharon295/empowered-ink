@@ -32,7 +32,7 @@ export const submitBookSchema = z
         message: "Please specify your book's genre or category.",
       });
     }
-    if (data.addCategories && data.secondaryCategories.length === 0) {
+    if (data.addCategories && !data.isFeatured && data.secondaryCategories.length === 0) {
       ctx.addIssue({
         code: "custom",
         path: ["secondaryCategories"],

@@ -40,7 +40,9 @@ export default function SubmissionForm() {
     primaryCategory === "Other" || secondaryCategories.filter(Boolean).includes("Other");
   const activeSecondary = secondaryCategories.filter(Boolean);
 
-  const total = (isFeatured ? FEATURED_PRICE : 0) + (addCategories && activeSecondary.length > 0 ? ADDON_PRICE : 0);
+  const total =
+    (isFeatured ? FEATURED_PRICE : 0) +
+    (addCategories && activeSecondary.length > 0 && !isFeatured ? ADDON_PRICE : 0);
   const submitLabel = useMemo(() => {
     if (total === 0) return "Submit for Free";
     return `Submit & Pay $${total}`;
@@ -87,7 +89,7 @@ export default function SubmissionForm() {
     if (!primaryCategory) nextErrors.primaryCategory = "Choose a primary category.";
     if (needsOther && !otherCategoryLabel.trim())
       nextErrors.otherCategoryLabel = "Please specify your book's genre or category.";
-    if (addCategories && activeSecondary.length === 0)
+    if (addCategories && !isFeatured && activeSecondary.length === 0)
       nextErrors.secondaryCategories = "Choose at least one secondary category, or turn this off.";
     if (isFeatured && (wordCount < 75 || wordCount > 100))
       nextErrors.description = `Featured listings require a 75–100 word description (currently ${wordCount}).`;
@@ -252,7 +254,10 @@ export default function SubmissionForm() {
             checked={addCategories}
             onChange={(e) => setAddCategories(e.target.checked)}
           />
-          Add more categories? <span className="font-normal text-[#6b5865]">— $35 for up to 2 more</span>
+          Add more categories?{" "}
+          <span className="font-normal text-[#6b5865]">
+            {isFeatured ? "— included free with Featured Placement" : "— $35 for up to 2 more"}
+          </span>
         </label>
 
         {addCategories && (
@@ -298,11 +303,20 @@ export default function SubmissionForm() {
 
       <div className="mb-6 rounded-sm border border-champagne-gold/50 bg-blush-linen p-4">
         <label className="flex items-center gap-2.5 text-[13.5px] font-semibold">
-          <input type="checkbox" checked={isFeatured} onChange={(e) => setIsFeatured(e.target.checked)} />
+          <input
+            type="checkbox"
+            checked={isFeatured}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setIsFeatured(checked);
+              if (checked) setAddCategories(true);
+            }}
+          />
           $75 to upgrade to Featured Placement
         </label>
         <ul className="mt-3 space-y-1.5 pl-1 text-[12.5px] text-[#3f2a3a]">
           <li>✓ Larger, upgraded cover image</li>
+          <li>✓ All 3 categories included, free</li>
           <li>✓ Top-of-page placement above standard listings</li>
           <li>✓ Runs through the end of this month</li>
         </ul>
