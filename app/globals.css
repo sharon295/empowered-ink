@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+:root {
+  --color-deep-plum: #54274e;
+  --color-rich-plum: #6d335e;
+  --color-champagne-gold: #d7af72;
+  --color-champagne-gold-light: #e3c393;
+  --color-blush-linen: #f5ede8;
+  --color-soft-lavender: #e8dde6;
+  --color-midnight-plum: #2c1a2e;
+  --color-warm-white: #f9f4f0;
+
+  --background: var(--color-warm-white);
+  --foreground: var(--color-midnight-plum);
+}
+
+@theme inline {
+  --color-deep-plum: var(--color-deep-plum);
+  --color-rich-plum: var(--color-rich-plum);
+  --color-champagne-gold: var(--color-champagne-gold);
+  --color-champagne-gold-light: var(--color-champagne-gold-light);
+  --color-blush-linen: var(--color-blush-linen);
+  --color-soft-lavender: var(--color-soft-lavender);
+  --color-midnight-plum: var(--color-midnight-plum);
+  --color-warm-white: var(--color-warm-white);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-display: var(--font-playfair);
+  --font-body: var(--font-jost);
+  --font-accent: var(--font-cormorant);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), serif;
+}
+
+.font-accent {
+  font-family: var(--font-accent), serif;
+  font-style: italic;
+}
+
+::selection {
+  background: var(--color-champagne-gold-light);
+  color: var(--color-midnight-plum);
+}
+
+.letter-heading:first-of-type {
+  margin-top: 0 !important;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

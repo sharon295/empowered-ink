@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum BookStatus {
+  pending
+  approved
+  rejected
+}
+
+model Book {
+  id                   String     @id @default(cuid())
+  title                String
+  author               String
+  email                String
+  phone                String
+  description          String?
+  coverImageUrl        String?
+  purchaseLink         String
+  primaryCategory      String
+  secondaryCategories  String     @default("[]")
+  otherCategoryLabel   String?
+  isFeatured           Boolean    @default(false)
+  featuredUntil        DateTime?
+  status               BookStatus @default(pending)
+  submittedAt          DateTime   @default(now())
+
+  stripeSessionId      String?
+  categoryAddonPaid    Boolean    @default(false)
+
+  @@index([status])
+  @@index([isFeatured, featuredUntil])
+}
