@@ -4,6 +4,7 @@ import { uploadCoverImage } from "@/lib/cloudinary";
 import { submitBookSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validation";
 import { getCategoryNames } from "@/lib/categories";
 import { derivedFields } from "@/lib/normalize.mjs";
+import { SUBMISSION_TYPES, submissionTypeOf } from "@/lib/submission-types";
 
 // Author submissions are free and limited to the essentials: author, contact
 // details, title, cover, purchase link and one category. Descriptions and
@@ -70,6 +71,10 @@ export async function POST(req: Request) {
       coverImageUrl,
       purchaseLink: data.purchaseLink,
       status: "pending",
+      requestedPlacement: (() => {
+        const type = submissionTypeOf(form.get("type"));
+        return type ? SUBMISSION_TYPES[type].requested : null;
+      })(),
     },
   });
 

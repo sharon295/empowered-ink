@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { AdminBook } from "@/lib/admin-types";
 import { monthLabel } from "@/lib/month";
+import { requestedLabel } from "@/lib/submission-types";
 import AdminBookForm from "./admin/AdminBookForm";
 import PlacementFields, { PLACEMENT_LABELS, type PlacementValue } from "./admin/PlacementFields";
 
@@ -23,7 +24,12 @@ function formatDate(iso: string | null) {
 }
 
 function SectionBadge({ book }: { book: AdminBook }) {
-  if (book.status !== "approved") return null;
+  if (book.status !== "approved") {
+    const requested = requestedLabel(book.requestedPlacement);
+    return requested ? (
+      <span className="border border-brass px-2 py-1 text-[12px] text-brass-text">Sent from the {requested} link</span>
+    ) : null;
+  }
   const month = book.placementMonth ? monthLabel(book.placementMonth) : "";
   const styles = {
     featured: ["bg-ink text-ivory", `Featured · ${month}`],
@@ -44,13 +50,16 @@ function ApproveControls({ book, currentMonth, busy, onApprove }: {
   busy: boolean;
   onApprove: (placement: PlacementValue) => void;
 }) {
-  // Default: a paid Featured listing keeps its Featured month; anything else
-  // goes to New on the Shelf this month.
-  const [placement, setPlacement] = useState<PlacementValue>(
-    book.placement
-      ? { placement: book.placement, placementMonth: book.placementMonth ?? currentMonth }
-      : { placement: "new_on_shelf", placementMonth: currentMonth }
-  );
+  // Default to the form link the author used (Featured / New on the Shelf /
+  // A–Z list) for the current month; with no link type, New on the Shelf.
+  // A month already set on the book is kept unless it has passed.
+  const [placement, setPlacement] = useState<PlacementValue>(() => {
+    const month = book.placementMonth && book.placementMonth >= currentMonth ? book.placementMonth : currentMonth;
+    if (book.placement) return { placement: book.placement, placementMonth: month };
+    if (book.requestedPlacement === "featured") return { placement: "featured", placementMonth: currentMonth };
+    if (book.requestedPlacement === "list") return { placement: null, placementMonth: null };
+    return { placement: "new_on_shelf", placementMonth: currentMonth };
+  });
   return (
     <div className="flex flex-wrap items-end gap-3">
       <PlacementFields value={placement} onChange={setPlacement} currentMonth={currentMonth} idPrefix={`ap-${book.id}`} compact />

@@ -18,6 +18,7 @@ export type AdminBook = {
   status: "pending" | "approved" | "rejected";
   placement: "featured" | "new_on_shelf" | null;
   placementMonth: string | null;
+  requestedPlacement: string | null;
   approvedAt: string | null;
   submittedAt: string;
   section: Section;
@@ -40,6 +41,7 @@ export function toAdminBook(book: Book, section: Section): AdminBook {
     status: book.status,
     placement: book.placement,
     placementMonth: book.placementMonth,
+    requestedPlacement: book.requestedPlacement,
     approvedAt: book.approvedAt?.toISOString() ?? null,
     submittedAt: book.submittedAt.toISOString(),
     section,

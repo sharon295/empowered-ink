@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import type { SubmissionType } from "@/lib/submission-types";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
@@ -10,7 +11,15 @@ type FieldErrors = Record<string, string>;
 // Authors send the essentials only: who they are, the book, where to buy it,
 // and one category. The owner adds any description or extra categories in
 // /admin when approving.
-export default function SubmissionForm({ categories }: { categories: string[] }) {
+export default function SubmissionForm({
+  categories,
+  type,
+  embedded,
+}: {
+  categories: string[];
+  type: SubmissionType | null;
+  embedded: boolean;
+}) {
   const router = useRouter();
 
   const [author, setAuthor] = useState("");
@@ -80,6 +89,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
       fd.set("primaryCategory", category);
       fd.set("otherCategoryLabel", category === "Other" ? otherCategoryLabel : "");
       fd.set("consent", String(consent));
+      if (type) fd.set("type", type);
       if (coverFile) fd.set("coverImage", coverFile);
 
       const res = await fetch("/api/submit", { method: "POST", body: fd });
@@ -97,7 +107,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         return;
       }
 
-      router.push("/book-feature-submission-form/thank-you");
+      router.push(`/book-feature-submission-form/thank-you${embedded ? "?embed=1" : ""}`);
     } catch {
       setSubmitError("Something went wrong submitting your book. Please try again.");
       setSubmitting(false);
