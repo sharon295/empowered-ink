@@ -76,7 +76,6 @@ without JavaScript. Component: `components/DirectoryClient.tsx`.
   is in right now.
 - **Add a Featured book** — `/admin/add?placement=featured`
 - **Add a New on the Shelf book** — `/admin/add?placement=new`
-
 - **Add to the A–Z list** — `/admin/add?placement=list` (for books already on the site; no spotlight month)
 
   Books added here are approved immediately, and the form reopens empty for the next one. Pick a later month to
