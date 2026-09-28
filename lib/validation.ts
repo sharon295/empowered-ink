@@ -14,17 +14,13 @@ export const submitBookSchema = (categories: string[]) => {
     email: z.string().trim().email("Enter a valid email"),
     phone: z.string().trim().min(7, "Enter a valid phone number"),
     title: z.string().trim().min(1, "Book title is required"),
-    description: z.string().trim().optional().default(""),
     purchaseLink: z.string().trim().url("Enter a valid purchase URL"),
     primaryCategory: categoryEnum,
-    secondaryCategories: z.array(categoryEnum).max(2).default([]),
     otherCategoryLabel: z.string().trim().optional().default(""),
     consent: z.coerce.boolean(),
   })
   .superRefine((data, ctx) => {
-    const needsOtherLabel =
-      data.primaryCategory === "Other" || data.secondaryCategories.includes("Other");
-    if (needsOtherLabel && !data.otherCategoryLabel.trim()) {
+    if (data.primaryCategory === "Other" && !data.otherCategoryLabel.trim()) {
       ctx.addIssue({
         code: "custom",
         path: ["otherCategoryLabel"],

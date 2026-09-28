@@ -5,25 +5,21 @@ import { submitBookSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validation";
 import { getCategoryNames } from "@/lib/categories";
 import { derivedFields } from "@/lib/normalize.mjs";
 
-// Author submissions are free. Every one is saved as pending; the owner
-// approves it in /admin and chooses Featured, New on the Shelf or the A–Z list.
+// Author submissions are free and limited to the essentials: author, contact
+// details, title, cover, purchase link and one category. Descriptions and
+// extra categories are only ever set by the owner in /admin, so anything
+// else sent here is ignored. Every submission is saved as pending; the owner
+// approves it and chooses Featured, New on the Shelf or the A–Z list.
 export async function POST(req: Request) {
   const form = await req.formData();
-
-  let secondaryCategories: unknown = [];
-  try {
-    secondaryCategories = JSON.parse(String(form.get("secondaryCategories") ?? "[]"));
-  } catch {}
 
   const raw = {
     author: String(form.get("author") ?? ""),
     email: String(form.get("email") ?? ""),
     phone: String(form.get("phone") ?? ""),
     title: String(form.get("title") ?? ""),
-    description: String(form.get("description") ?? ""),
     purchaseLink: String(form.get("purchaseLink") ?? ""),
     primaryCategory: String(form.get("primaryCategory") ?? ""),
-    secondaryCategories,
     otherCategoryLabel: String(form.get("otherCategoryLabel") ?? ""),
     consent: form.get("consent") === "true",
   };
@@ -54,15 +50,14 @@ export async function POST(req: Request) {
   const buffer = Buffer.from(await coverImage.arrayBuffer());
   const coverImageUrl = await uploadCoverImage(buffer, coverImage.type);
 
-  const secondary = data.secondaryCategories.filter((c) => c !== data.primaryCategory);
   const fields = {
     title: data.title,
     author: data.author,
     primaryCategory: data.primaryCategory,
-    secondaryCategories: JSON.stringify(secondary),
-    // Extra categories are free, so they're shown as soon as the book is approved.
-    categoryAddonPaid: secondary.length > 0,
-    otherCategoryLabel: data.otherCategoryLabel || null,
+    secondaryCategories: "[]",
+    // Extra categories the owner adds in /admin show without a further step.
+    categoryAddonPaid: true,
+    otherCategoryLabel: data.primaryCategory === "Other" ? data.otherCategoryLabel || null : null,
   };
 
   const book = await prisma.book.create({
@@ -71,7 +66,7 @@ export async function POST(req: Request) {
       ...derivedFields(fields),
       email: data.email,
       phone: data.phone,
-      description: data.description || null,
+      description: null,
       coverImageUrl,
       purchaseLink: data.purchaseLink,
       status: "pending",
