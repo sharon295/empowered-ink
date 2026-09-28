@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/backfill.mjs && next start",
+    "db:backfill": "node scripts/backfill.mjs",
     "lint": "eslint"
   },
   "dependencies": {
@@ -16,7 +17,6 @@
     "prisma": "^6.19.3",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "stripe": "^22.5.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

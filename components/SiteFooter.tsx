@@ -1,19 +1,21 @@
+import { FOOTER_LINKS } from "@/lib/site-links";
+
 export default function SiteFooter() {
   return (
-    <footer className="bg-midnight-plum py-7 text-[12px] text-warm-white/55">
-      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3.5 px-8">
-        <div>© {new Date().getFullYear()} Sharon Ringier. All Rights Reserved.</div>
-        <div className="flex gap-4.5">
-          <a href="#" className="text-warm-white/75">
-            Instagram
-          </a>
-          <a href="#" className="text-warm-white/75">
-            LinkedIn
-          </a>
-          <a href="#" className="text-warm-white/75">
-            YouTube
-          </a>
-        </div>
+    <footer className="mt-auto bg-ink text-cover">
+      <div className="mx-auto max-w-[1200px] px-4 py-12 sm:px-8">
+        <p className="font-display text-[22px] text-ivory">Possible Woman</p>
+        <p className="mt-2 font-display italic text-[15px]">Because possible isn&rsquo;t a word. It&rsquo;s a way of life.</p>
+        <nav aria-label="Footer" className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-[13.5px]">
+          {FOOTER_LINKS.map((l) => (
+            <a key={l.label} href={l.href} className="hover:text-brass">
+              {l.label}
+            </a>
+          ))}
+        </nav>
+        <p className="mt-8 border-t border-white/15 pt-6 text-[12.5px]">
+          © 2026 Possible Woman, LLC. Colorado Springs, CO.
+        </p>
       </div>
     </footer>
   );

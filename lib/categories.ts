@@ -1,27 +1,9 @@
-export const CATEGORIES = [
-  "Business & Entrepreneurship",
-  "Leadership",
-  "Personal Development",
-  "Mindset & Motivation",
-  "Women's Empowerment",
-  "Faith & Spirituality",
-  "Health & Wellness",
-  "Finance & Wealth",
-  "Relationships & Family",
-  "Children & Young Adult",
-  "Memoir & Inspirational",
-  "Fiction",
-  "Poetry",
-  "Lifestyle",
-  "Social Impact",
-  "Other",
-] as const;
+import { prisma } from "./prisma";
 
-export type Category = (typeof CATEGORIES)[number];
-
-export const FEATURED_PRICE_CENTS = 7500;
-export const CATEGORY_ADDON_PRICE_CENTS = 3500;
-
-export function lastDayOfCurrentMonth(from: Date = new Date()): Date {
-  return new Date(Date.UTC(from.getUTCFullYear(), from.getUTCMonth() + 1, 0, 23, 59, 59));
+// The category list lives in the Category table (managed at /admin/categories)
+// and is the single source of truth for the form, validation and the
+// directory's category buttons.
+export async function getCategoryNames(): Promise<string[]> {
+  const rows = await prisma.category.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] });
+  return rows.map((r) => r.name);
 }

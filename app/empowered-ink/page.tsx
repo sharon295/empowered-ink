@@ -1,165 +1,107 @@
-import Link from "next/link";
-import SiteNav from "@/components/SiteNav";
-import SiteFooter from "@/components/SiteFooter";
+import type { Metadata } from "next";
 import DirectoryClient from "@/components/DirectoryClient";
-import { CATEGORIES } from "@/lib/categories";
-import { getApprovedBooks } from "@/lib/books";
+import EmbedResizer from "@/components/EmbedResizer";
+import BookCard from "@/components/BookCard";
+import NewOnShelf from "@/components/NewOnShelf";
+import { NEW_ON_SHELF_PREVIEW, getCategoryFacets, getSpotlight, listBooks } from "@/lib/books";
+import { currentMonthKey } from "@/lib/month";
 
-export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
-export default async function EmpoweredInkPage() {
-  const books = await getApprovedBooks();
-  const featuredCount = books.filter(
-    (b) => b.isFeatured && b.featuredUntil && new Date() <= new Date(b.featuredUntil)
-  ).length;
+export const metadata: Metadata = {
+  title: "Empowered Ink Books — Possible Woman Magazine",
+  description: "Books by the Possible Woman author community, A to Z.",
+};
+
+const SUBMIT_URL = process.env.NEXT_PUBLIC_SUBMIT_URL || "/book-feature-submission-form";
+
+function param(value: string | string[] | undefined): string {
+  return (Array.isArray(value) ? value[0] : value)?.slice(0, 200) ?? "";
+}
+
+// The directory is designed to be embedded between the magazine's own header,
+// hero and footer (see README, "Embedding"), so it renders only the book
+// sections and a closing submit band.
+export default async function EmpoweredInkPage({ searchParams }: PageProps<"/empowered-ink">) {
+  const params = await searchParams;
+  const filters = { q: param(params.q), category: param(params.category) };
+  const after = param(params.after) || null;
+  const month = currentMonthKey();
+
+  const [spotlight, firstPage, categories] = await Promise.all([
+    getSpotlight(month),
+    listBooks({ ...filters, after }, month),
+    getCategoryFacets(month),
+  ]);
+
+  const spotlightSections = (
+    <>
+      {spotlight.featured.length > 0 && (
+        <section aria-labelledby="featured-heading" className="mx-auto max-w-[1200px] px-4 pt-14 sm:px-8 sm:pt-20">
+          <p className="label text-[15px] text-brass-text">Featured</p>
+          <h2 id="featured-heading" className="font-display mt-1 text-[30px] leading-tight sm:text-[38px]">
+            Featured This Month
+          </h2>
+          <p className="mt-3 max-w-2xl text-[14px] text-soft">
+            Featured listings rotate monthly and move into the full list when the month ends.
+          </p>
+          <ul className="mt-9 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+            {spotlight.featured.map((book) => (
+              <li key={book.id}>
+                <BookCard book={book} size="featured" eager />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {spotlight.newOnShelf.length > 0 && (
+        <section aria-labelledby="new-heading" className="mt-14 bg-tint sm:mt-20">
+          <div className="mx-auto max-w-[1200px] px-4 py-14 sm:px-8 sm:py-20">
+            <p className="label text-[15px] text-brass-text">New This Month</p>
+            <h2 id="new-heading" className="font-display mt-1 text-[30px] leading-tight sm:text-[38px]">
+              New on the Shelf
+            </h2>
+            <p className="mt-3 max-w-2xl text-[14px] text-soft">
+              Newly added to Empowered Ink this month. On the first of next month, each book moves into the full
+              list below.
+            </p>
+            <NewOnShelf books={spotlight.newOnShelf} preview={NEW_ON_SHELF_PREVIEW} />
+          </div>
+        </section>
+      )}
+    </>
+  );
 
   return (
-    <>
-      <SiteNav active="directory" />
+    <main id="ei-root">
+      <EmbedResizer />
+      <DirectoryClient
+        key={`${month}|${filters.q}|${filters.category}|${after ?? ""}`}
+        initialPage={firstPage}
+        initialFilters={filters}
+        categories={categories}
+        spotlight={spotlightSections}
+        startedAfter={Boolean(after)}
+      />
 
-      <section className="relative overflow-hidden bg-gradient-to-b from-midnight-plum to-deep-plum py-18 pb-14 text-warm-white">
-        <div className="mx-auto max-w-6xl px-8">
-          <div className="mb-4.5 flex items-center gap-2.5 text-[11.5px] uppercase tracking-[0.22em] text-champagne-gold-light">
-            <span className="h-px w-[34px] bg-champagne-gold-light" /> Empowered Ink · Book Directory
+      <section className="bg-ink text-ivory">
+        <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 px-4 py-14 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+          <div>
+            <p className="label text-[15px] text-cover">For Authors</p>
+            <h2 className="font-display mt-1 text-[26px] italic leading-tight sm:text-[32px]">
+              Share your book with our community
+            </h2>
           </div>
-          <h1 className="mb-4.5 max-w-xl font-display text-[42px] font-medium leading-[1.05] sm:text-[56px]">
-            Every book has a <em className="font-accent text-champagne-gold-light">story</em>. So does its author.
-          </h1>
-          <p className="mb-7 max-w-lg text-[16.5px] leading-relaxed text-warm-white/80">
-            Browse the women entrepreneurs and authors we&rsquo;ve featured — searchable by category and author,
-            and ordered alphabetically so every book gets found.
-          </p>
-          <div className="mb-8 flex flex-wrap gap-9">
-            <div>
-              <b className="font-display block text-[26px]">{books.length}</b>
-              <span className="text-[11px] uppercase tracking-wide text-warm-white/55">Books Listed</span>
-            </div>
-            <div>
-              <b className="font-display block text-[26px]">{CATEGORIES.length - 1}</b>
-              <span className="text-[11px] uppercase tracking-wide text-warm-white/55">Categories</span>
-            </div>
-            <div>
-              <b className="font-display block text-[26px]">{featuredCount}</b>
-              <span className="text-[11px] uppercase tracking-wide text-warm-white/55">Featured This Issue</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3.5">
-            <Link
-              href="/book-feature-submission-form"
-              className="inline-flex items-center gap-2 rounded-sm bg-champagne-gold px-[26px] py-3.5 text-[12.5px] font-bold uppercase tracking-wider text-midnight-plum"
-            >
-              Submit Your Book
-            </Link>
-            <a
-              href="#directory"
-              className="inline-flex items-center gap-2 rounded-sm border border-warm-white/35 px-6 py-[13px] text-[12.5px] font-bold uppercase tracking-wider text-warm-white"
-            >
-              Browse the Directory
-            </a>
-          </div>
+          <a
+            href={SUBMIT_URL}
+            target="_top"
+            className="border border-ivory bg-ivory px-6 py-3 text-[14px] font-medium text-ink hover:border-brass hover:bg-brass hover:text-ink"
+          >
+            Submit Your Book
+          </a>
         </div>
       </section>
-
-      <DirectoryClient books={books} />
-
-      <section className="bg-midnight-plum">
-        <div className="mx-auto max-w-6xl px-8 py-14">
-          <div className="mb-7 flex flex-wrap items-baseline justify-between gap-2.5">
-            <div>
-              <div className="flex items-center gap-2.5 text-[11.5px] font-bold uppercase tracking-[0.2em] text-champagne-gold-light">
-                <span className="h-px w-[26px] bg-champagne-gold-light" /> Submit Your Book
-              </div>
-              <h2 className="mt-1.5 font-display text-[30px] font-medium text-warm-white">
-                Three ways to be featured
-              </h2>
-            </div>
-            <p className="max-w-[360px] text-right text-[13px] text-warm-white/55">
-              Every submission starts with the standard listing — the upgrades below are optional add-ons.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-px border border-warm-white/10 bg-warm-white/10 md:grid-cols-3">
-            <div className="flex flex-col gap-4 bg-midnight-plum p-7">
-              <div className="text-[11px] uppercase tracking-wider text-champagne-gold-light">Included</div>
-              <h3 className="font-display text-[24px] font-medium text-warm-white">Standard Listing</h3>
-              <div className="font-display text-[34px] text-champagne-gold-light">Free</div>
-              <ul className="flex flex-col gap-2.5">
-                {[
-                  "Flat cover image",
-                  "Title, author & purchase link",
-                  "Placed alphabetically by title",
-                  "1 free primary category, included in search",
-                ].map((li) => (
-                  <li key={li} className="flex gap-2.5 text-[13px] leading-relaxed text-warm-white/75">
-                    <span className="font-bold text-champagne-gold-light">✓</span> {li}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/book-feature-submission-form"
-                className="mt-auto rounded-sm border border-warm-white/35 px-6 py-[13px] text-center text-[12.5px] font-bold uppercase tracking-wider text-warm-white"
-              >
-                Submit for Free
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-4 bg-[#3a2440] p-7">
-              <div className="text-[11px] uppercase tracking-wider text-champagne-gold-light">Most popular</div>
-              <h3 className="font-display text-[24px] font-medium text-warm-white">Featured Placement</h3>
-              <div className="font-display text-[34px] text-champagne-gold-light">
-                $75 <span className="font-body text-[13px] text-warm-white/50">/ 1 month</span>
-              </div>
-              <ul className="flex flex-col gap-2.5">
-                {[
-                  "Upgraded, larger cover image",
-                  "All 3 categories included, free",
-                  "Top-of-page placement above standard listings",
-                  "75–100 word author & book description",
-                  "Runs through the end of the current month, then automatically moves into the standard directory",
-                ].map((li) => (
-                  <li key={li} className="flex gap-2.5 text-[13px] leading-relaxed text-warm-white/75">
-                    <span className="font-bold text-champagne-gold-light">✓</span> {li}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/book-feature-submission-form"
-                className="mt-auto rounded-sm bg-champagne-gold px-6 py-3.5 text-center text-[12.5px] font-bold uppercase tracking-wider text-midnight-plum"
-              >
-                Get Featured
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-4 bg-midnight-plum p-7">
-              <div className="text-[11px] uppercase tracking-wider text-champagne-gold-light">Add-on for Standard listings</div>
-              <h3 className="font-display text-[24px] font-medium text-warm-white">Category Placement</h3>
-              <div className="font-display text-[34px] text-champagne-gold-light">
-                $35 <span className="font-body text-[13px] text-warm-white/50">/ up to 2 extra categories</span>
-              </div>
-              <ul className="flex flex-col gap-2.5">
-                {[
-                  "Every listing includes 1 free primary category",
-                  "Add up to 2 more for $35 (3 total)",
-                  "Included automatically if you choose Featured instead",
-                  "Makes your book easier to discover by genre",
-                ].map((li) => (
-                  <li key={li} className="flex gap-2.5 text-[13px] leading-relaxed text-warm-white/75">
-                    <span className="font-bold text-champagne-gold-light">✓</span> {li}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/book-feature-submission-form"
-                className="mt-auto rounded-sm border border-warm-white/35 px-6 py-[13px] text-center text-[12.5px] font-bold uppercase tracking-wider text-warm-white"
-              >
-                Add Categories
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <SiteFooter />
-    </>
+    </main>
   );
 }

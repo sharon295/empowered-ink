@@ -1,97 +1,124 @@
 # Empowered Ink
 
-Book directory and submission flow for [Possible Woman Magazine](https://possiblewomanmagazine.com). Replaces the
-static GHL directory page with a real, data-backed directory (`/empowered-ink`) and a submission form
-(`/book-feature-submission-form`) that handles Standard / Featured / category-add-on pricing via Stripe Checkout.
+Book directory and submission flow for [Possible Woman Magazine](https://possiblewomanmagazine.com).
 
-Design reference for layout, copy tone, and interaction behavior: `empowered-ink-directory-mockup.html` in the repo root
-(kept for reference only — the live pages are the Next.js routes below).
+- `/empowered-ink` — the directory, built to be **embedded** in the magazine page between its own header, hero
+  and footer (see [Embedding](#embedding-on-the-magazine-site)).
+- `/book-feature-submission-form` — the free author submission form. Every submission waits in `/admin` as
+  pending until the owner approves it and chooses where it shows.
+- `/admin` — the owner's review and editing screens, behind a single password.
 
 ## Stack
 
-Next.js (App Router) + TypeScript + Tailwind v4 + Prisma + Stripe + Cloudinary (with a local-disk fallback for
-low-traffic/dev use). SQLite locally, Postgres in production.
+Next.js (App Router) + TypeScript + Tailwind v4 + Prisma + Postgres + Cloudinary (with a local-disk
+fallback for covers).
 
 ## Local development
 
+You need a Postgres database (any local install, Docker, or a Render dev database).
+
 ```bash
 npm install
-cp .env.local.example .env.local   # fill in real keys as you get them; placeholders are fine to start
-npx prisma migrate dev             # creates prisma/dev.db and applies the schema
-npx prisma db seed                 # seeds 30 sample books (3 active Featured, 1 lapsed, 1 pending)
+cp .env.local.example .env.local   # set DATABASE_URL; placeholders are fine for the rest
+cp .env.local.example .env         # Prisma's CLI reads .env, Next reads .env.local
+npx prisma migrate dev             # applies the schema
+npx prisma db seed                 # sample books placed relative to the current month
 npm run dev
 ```
 
-Visit `http://localhost:3000/empowered-ink` for the directory, `/book-feature-submission-form` for the submission
-form, and `/admin` for the review queue (password = `ADMIN_PASSWORD` env var).
+The seed always exercises every section: 3 Featured this month, 14 New on the Shelf (more than the 12 shown before
+"Show all"), a lapsed Featured book, a book scheduled for next month, a pending and a rejected submission, and enough
+A–Z books for several batches of scroll.
 
-### Cover image uploads without Cloudinary
+## How the directory decides where a book goes
 
-`lib/cloudinary.ts` checks whether real `CLOUDINARY_*` env vars are set. If not, it saves uploads to
-`public/uploads/` on local disk instead, so the submission form works end-to-end without a Cloudinary account.
-This is also a legitimate low-traffic production option per Render's own-disk guidance (see Deploying, below) —
-just leave the Cloudinary vars unset and attach a persistent disk to the Render service.
+Every approved book appears in exactly one place, computed **when the page loads** from the book's `placement`,
+its `placementMonth` ("YYYY-MM") and the current month in **America/Denver** time. Nothing runs on a schedule and
+nothing is edited when a month rolls over.
 
-### Payments locally
+| The book's placement month is… | It shows in |
+| --- | --- |
+| a later month | nowhere yet (scheduled) |
+| this month | its section: **Featured This Month** or **New on the Shelf** |
+| an earlier month, or no placement | **All Empowered Ink Books** (A to Z) |
 
-Without a real `STRIPE_SECRET_KEY`, the free-submission path (no upgrades selected) works fully. Selecting
-Featured and/or the category add-on will hit Stripe and fail cleanly with a 502 until you set real **test mode**
-Stripe keys — see stripe.com/docs/keys. To exercise the webhook locally, use the Stripe CLI:
+- The owner chooses the section and month in `/admin` when approving or adding a book, and can change either at
+  any time. Approving defaults to New on the Shelf for the current month. There is no payment: placement is always
+  the owner's choice.
+- With a search or category active, both spotlight sections are hidden and every visible book is searched in one
+  A–Z list, so a reader looking for a featured or new title always finds it.
+- Empty sections are hidden. New on the Shelf shows 12 books, then "Show all N new books".
 
-```bash
-stripe listen --forward-to localhost:3000/api/webhooks/stripe
+Logic: `lib/books.ts` (`sectionOf` and the queries), `lib/month.ts` (Denver months).
+
+## Alphabetical order
+
+Each book stores a `sortTitle` (lowercased, accents removed, punctuation and a leading "The", "A" or "An"
+ignored), recomputed on every create, edit and category rename, and the database sorts on `(sortTitle, id)`. The
+rules live in `lib/normalize.mjs`. `npm start` runs `scripts/backfill.mjs` first, which recomputes any stale
+`sortTitle` / `searchText` / `categories` values, so a fresh migration or a rule change needs no manual step.
+
+## Continuous scroll
+
+The A–Z list renders its first 24 books on the server, then loads 24 more from `GET /api/books` as the reader
+nears the end (about 600px early), using a keyset cursor on `(sortTitle, id)`, so books approved mid-visit cause no
+duplicates or skips. Search (`?q=`) and category (`?category=`) run on the server against the whole list and are
+kept in the URL. The list restores itself and the scroll position when the reader comes back with Back, shows
+"You've reached the end of the shelf" and stops requesting at the end, and falls back to a "Load more books" link
+without JavaScript. Component: `components/DirectoryClient.tsx`.
+
+## Admin
+
+`/admin` (password = `ADMIN_PASSWORD`; the session cookie is signed, so it can't be forged by hand):
+
+- **Books** — Pending / Approved / Rejected / All; approve with a section and month, reject or unpublish, feature
+  or un-feature, and edit every field including the cover and the approved date. Each book shows which section it
+  is in right now.
+- **Add a Featured book** — `/admin/add?placement=featured`
+- **Add a New on the Shelf book** — `/admin/add?placement=new`
+- **Add to the A–Z list** — `/admin/add?placement=list` (for books already on the site; no spotlight month)
+
+  Books added here are approved immediately, and the form reopens empty for the next one. Pick a later month to
+  schedule a Featured or New on the Shelf book.
+- **Categories** — rename (updates every book), add, and see how many books use each. This list feeds the
+  submission form, validation and the directory's category buttons (a button only appears once a visible book
+  uses the category).
+
+## Embedding on the magazine site
+
+Paste this where the directory should appear, between the page's header/hero and footer (replace `YOUR-APP` with
+the app's address):
+
+```html
+<iframe id="empowered-ink" src="https://YOUR-APP/empowered-ink"
+        title="Empowered Ink book directory"
+        style="display:block;width:100%;border:0;min-height:900px"></iframe>
+<script src="https://YOUR-APP/embed.js" defer></script>
 ```
 
-and put the `whsec_...` it prints into `STRIPE_WEBHOOK_SECRET`.
+`embed.js` sizes the iframe to its content (no inner scrollbar), tells the directory where the reader is on the
+page so continuous scroll and "Back to top" work, copies `?q=` / `?category=` into the magazine page's address bar
+so searches can be shared, and returns the reader to the same place when they come back.
 
-## Data model
-
-Single `Book` table (`prisma/schema.prisma`). Only `status = "approved"` rows are ever returned to the public
-directory (`lib/books.ts`); everything else is admin-gated. `isFeatured` / `featuredUntil` are only set by the
-Stripe webhook on payment success, never at submit time — a Featured purchase on the 30th still runs through the
-full following month because `featuredUntil` is computed at the moment payment clears, not at submission.
-`secondaryCategories` are stored at submission time but only surfaced publicly once `categoryAddonPaid` is true.
-
-The 16-category list lives in `lib/categories.ts` — it's the single source of truth for the form, the directory
-filter, and validation.
+"Learn more" opens the book's link in a new tab; "Submit Your Book" opens the submission form in the whole window.
 
 ## Deploying to Render
 
-1. **Push to GitHub.** Render deploys from a GitHub repo on push to `main`.
-2. **Switch the datasource for Postgres.** In `prisma/schema.prisma`, change:
-   ```diff
-   - provider = "sqlite"
-   + provider = "postgresql"
-   ```
-   (Local dev intentionally uses SQLite for a zero-setup `npm install && npm run dev`; Render Postgres needs the
-   `postgresql` provider. This is a one-line change before your first deploy.)
-3. **Create a Render Postgres instance** (Render dashboard → New → PostgreSQL). Copy its internal connection
-   string.
-4. **Create a Render Web Service** connected to this repo:
+1. **Create a Render Postgres instance** and copy its internal connection string.
+2. **Create a Render Web Service** connected to this repo:
    - Build command: `npm install && npx prisma migrate deploy && npm run build`
-   - Start command: `npm run start`
-   - Auto-deploy: on push to `main`
-5. **Set environment variables** on the Web Service (Render dashboard → Environment — never commit these):
-   - `DATABASE_URL` — the Render Postgres connection string from step 3
-   - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — from your Stripe dashboard (live keys for production)
-   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — if using Cloudinary. If you'd rather
-     use a Render persistent disk instead (fine for this traffic level), leave these unset, attach a disk mounted
-     at `/opt/render/project/src/public/uploads`, and covers will be written there instead.
-   - `ADMIN_PASSWORD` — password for `/admin`
-   - `NEXT_PUBLIC_SITE_URL` — the service's public URL (used to build Stripe success/cancel redirect URLs)
-6. **Point Stripe's webhook** at `https://<your-render-url>/api/webhooks/stripe` for the `checkout.session.completed`
-   event, and put the resulting signing secret into `STRIPE_WEBHOOK_SECRET`.
+   - Start command: `npm run start` (runs the backfill, then the app)
+3. **Environment variables** (Render dashboard → Environment — never commit these):
+   - `DATABASE_URL` — the Render Postgres connection string
+   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — or leave unset and attach a disk at
+     `/opt/render/project/src/public/uploads`
+   - `ADMIN_PASSWORD` — password for `/admin`; optionally `ADMIN_SESSION_SECRET` to sign sessions with a
+     separate secret
+   - `NEXT_PUBLIC_DIRECTORY_PAGE_URL` — the magazine page that embeds the directory ("Back to the Directory")
 
-## Embedding on the GHL site
+Any Stripe variables or webhook left over from the earlier version can be deleted; the app no longer uses them.
 
-Preferred: point the GHL nav items ("Empowered Ink", "Book Feature Submission") straight at the Render URL (or a
-custom subdomain like `empowered-ink.possiblewomanmagazine.com`) rather than embedding. This app has no vh-based
-heights or `overflow` rules on its own containers, and pagination keeps each view a bounded height — so if it does
-get embedded via iframe, add an iframe-resizer (postMessage-based) so the parent GHL page's scrollbar is used
-instead of the iframe getting its own internal one. That's the same fix needed on the `community-events` page.
-
-## Admin review
-
-`/admin` is a single password gate (`ADMIN_PASSWORD`) with no per-user accounts — appropriate for one or two people
-moderating submissions. It lists every `pending` book with Approve/Reject buttons; only `approved` rows are ever
-queried by the public directory.
+The `directory_sections` migration only adds columns and a table. It stamps existing approved books as approved on
+their submission date and keeps any Featured listing that is still running in Featured, so no existing book shows
+up as New on the Shelf. The old Stripe columns (`stripeSessionId`, `categoryAddonPaid`) stay in the table so no data
+is lost; `categoryAddonPaid` now just means "show the extra categories".

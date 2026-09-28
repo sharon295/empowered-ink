@@ -1,25 +1,16 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Jost, Cormorant_Garamond } from "next/font/google";
+import { Bodoni_Moda, Work_Sans } from "next/font/google";
 import "./globals.css";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const bodoni = Bodoni_Moda({
+  variable: "--font-bodoni",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
 });
 
-const jost = Jost({
-  variable: "--font-jost",
+const workSans = Work_Sans({
+  variable: "--font-work-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["italic"],
 });
 
 export const metadata: Metadata = {
@@ -30,13 +21,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="en"
-      className={`${playfair.variable} ${jost.variable} ${cormorant.variable}`}
-    >
-      <body className="min-h-full flex flex-col bg-warm-white text-midnight-plum">
-        {children}
-      </body>
+    <html lang="en" className={`${bodoni.variable} ${workSans.variable}`}>
+      <body className="flex min-h-full flex-col bg-ivory text-ink">{children}</body>
     </html>
   );
 }

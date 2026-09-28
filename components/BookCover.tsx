@@ -1,35 +1,39 @@
-const PALETTE = ["#54274e", "#2c1a2e", "#6d335e", "#8a5a72", "#3a2440", "#4b2440", "#6b4560"];
-
-function colorFor(seed: string) {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  return PALETTE[hash % PALETTE.length];
-}
-
+// A 2:3 cover. Without an uploaded image, shows the title on the cover
+// placeholder colour so the grid still reads as a shelf.
 export default function BookCover({
   title,
+  author,
   coverImageUrl,
-  size = "large",
+  eager = false,
+  titleSize = "text-[13px]",
 }: {
   title: string;
+  author: string;
   coverImageUrl?: string | null;
-  size?: "large" | "small";
+  eager?: boolean;
+  titleSize?: string;
 }) {
-  if (coverImageUrl) {
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={coverImageUrl} alt={`Cover of ${title}`} className="h-full w-full object-cover" />;
-  }
-  const bg = colorFor(title);
+  const alt = `Cover of ${title} by ${author}`;
   return (
-    <div
-      className="flex h-full w-full items-center justify-center p-3.5 text-center"
-      style={{ background: `linear-gradient(155deg, ${bg} 0%, #2c1a2e 130%)` }}
-    >
-      <span
-        className={`font-accent leading-tight text-white/95 ${size === "large" ? "text-[15px]" : "text-[10.5px]"}`}
-      >
-        {title}
-      </span>
+    <div className="relative aspect-[2/3] w-full overflow-hidden bg-cover">
+      {coverImageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={coverImageUrl}
+          alt={alt}
+          width={400}
+          height={600}
+          loading={eager ? "eager" : "lazy"}
+          decoding="async"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      ) : (
+        <div role="img" aria-label={alt} className="absolute inset-0 flex items-center justify-center p-[12%] text-center">
+          <span aria-hidden="true" className={`font-display italic leading-snug text-soft ${titleSize}`}>
+            {title}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

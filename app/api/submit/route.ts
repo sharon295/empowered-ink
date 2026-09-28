@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { stripe } from "@/lib/stripe";
 import { uploadCoverImage } from "@/lib/cloudinary";
 import { submitBookSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validation";
-import { FEATURED_PRICE_CENTS, CATEGORY_ADDON_PRICE_CENTS } from "@/lib/categories";
+import { getCategoryNames } from "@/lib/categories";
+import { derivedFields } from "@/lib/normalize.mjs";
 
+// Author submissions are free. Every one is saved as pending; the owner
+// approves it in /admin and chooses Featured, New on the Shelf or the A–Z list.
 export async function POST(req: Request) {
   const form = await req.formData();
+
+  let secondaryCategories: unknown = [];
+  try {
+    secondaryCategories = JSON.parse(String(form.get("secondaryCategories") ?? "[]"));
+  } catch {}
 
   const raw = {
     author: String(form.get("author") ?? ""),
@@ -16,14 +23,12 @@ export async function POST(req: Request) {
     description: String(form.get("description") ?? ""),
     purchaseLink: String(form.get("purchaseLink") ?? ""),
     primaryCategory: String(form.get("primaryCategory") ?? ""),
-    secondaryCategories: JSON.parse(String(form.get("secondaryCategories") ?? "[]")),
+    secondaryCategories,
     otherCategoryLabel: String(form.get("otherCategoryLabel") ?? ""),
-    isFeatured: form.get("isFeatured") === "true",
-    addCategories: form.get("addCategories") === "true",
     consent: form.get("consent") === "true",
   };
 
-  const parsed = submitBookSchema.safeParse(raw);
+  const parsed = submitBookSchema(await getCategoryNames()).safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json({ error: "validation", issues: parsed.error.issues }, { status: 400 });
   }
@@ -49,87 +54,29 @@ export async function POST(req: Request) {
   const buffer = Buffer.from(await coverImage.arrayBuffer());
   const coverImageUrl = await uploadCoverImage(buffer, coverImage.type);
 
-  const wantsFeatured = data.isFeatured;
-  // Featured already bundles all 3 categories for free, so the paid add-on
-  // only applies to a Standard listing.
-  const wantsAddon = data.addCategories && data.secondaryCategories.length > 0 && !wantsFeatured;
+  const secondary = data.secondaryCategories.filter((c) => c !== data.primaryCategory);
+  const fields = {
+    title: data.title,
+    author: data.author,
+    primaryCategory: data.primaryCategory,
+    secondaryCategories: JSON.stringify(secondary),
+    // Extra categories are free, so they're shown as soon as the book is approved.
+    categoryAddonPaid: secondary.length > 0,
+    otherCategoryLabel: data.otherCategoryLabel || null,
+  };
 
   const book = await prisma.book.create({
     data: {
-      title: data.title,
-      author: data.author,
+      ...fields,
+      ...derivedFields(fields),
       email: data.email,
       phone: data.phone,
       description: data.description || null,
       coverImageUrl,
       purchaseLink: data.purchaseLink,
-      primaryCategory: data.primaryCategory,
-      secondaryCategories: JSON.stringify(data.secondaryCategories),
-      otherCategoryLabel: data.otherCategoryLabel || null,
-      isFeatured: false,
-      featuredUntil: null,
-      categoryAddonPaid: false,
       status: "pending",
     },
   });
 
-  if (!wantsFeatured && !wantsAddon) {
-    return NextResponse.json({ free: true, bookId: book.id });
-  }
-
-  const lineItems: { price_data: { currency: string; product_data: { name: string; description: string }; unit_amount: number }; quantity: number }[] = [];
-  if (wantsFeatured) {
-    lineItems.push({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: "Featured Placement",
-          description: "Empowered Ink Featured Placement — runs through the end of this month",
-        },
-        unit_amount: FEATURED_PRICE_CENTS,
-      },
-      quantity: 1,
-    });
-  }
-  if (wantsAddon) {
-    lineItems.push({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: "Additional Categories",
-          description: "Empowered Ink — up to 2 additional category placements",
-        },
-        unit_amount: CATEGORY_ADDON_PRICE_CENTS,
-      },
-      quantity: 1,
-    });
-  }
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  try {
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: lineItems,
-      success_url: `${siteUrl}/book-feature-submission-form/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${siteUrl}/book-feature-submission-form?canceled=1`,
-      metadata: {
-        bookId: book.id,
-        featured: String(wantsFeatured),
-        categoryAddon: String(wantsAddon),
-      },
-    });
-
-    await prisma.book.update({
-      where: { id: book.id },
-      data: { stripeSessionId: session.id },
-    });
-
-    return NextResponse.json({ free: false, checkoutUrl: session.url, bookId: book.id });
-  } catch {
-    await prisma.book.delete({ where: { id: book.id } });
-    return NextResponse.json(
-      { error: "checkout", message: "We couldn't start checkout for your upgrade. Please try again." },
-      { status: 502 }
-    );
-  }
+  return NextResponse.json({ bookId: book.id });
 }
