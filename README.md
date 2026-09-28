@@ -4,8 +4,16 @@ Book directory and submission flow for [Possible Woman Magazine](https://possibl
 
 - `/empowered-ink` — the directory, built to be **embedded** in the magazine page between its own header, hero
   and footer (see [Embedding](#embedding-on-the-magazine-site)).
-- `/book-feature-submission-form` — the free author submission form. Every submission waits in `/admin` as
-  pending until the owner approves it and chooses where it shows.
+- `/book-feature-submission-form` — the free author submission form, with three shareable links (like the member
+  directory's `/join?tier=…` links):
+  - `?type=featured` — Featured Author Submission
+  - `?type=new` — Book of the Month (New on the Shelf) Submission
+  - `?type=list` — Add Your Book (A–Z list)
+
+  Authors enter their name, email and phone (private), title, cover, purchase link and one category. Every
+  submission waits in `/admin` as pending, marked with the link it came from and with Approve preset to match;
+  the owner can still place it anywhere. Add `&embed=1` to embed the form in another page (it then drops its own
+  header and footer), using the same iframe + `embed.js` snippet as the directory.
 - `/admin` — the owner's review and editing screens, behind a single password.
 
 ## Stack

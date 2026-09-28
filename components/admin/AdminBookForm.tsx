@@ -137,9 +137,20 @@ export default function AdminBookForm({
         )}
         {field(
           "description",
-          "Description",
-          <textarea id={id("description")} rows={5} value={f.description} onChange={set("description")} className={inputClass(errors.description)} />,
-          "Featured cards show the first line."
+          "Description (only you can add this)",
+          <>
+            <textarea id={id("description")} rows={5} value={f.description} onChange={set("description")} className={inputClass(errors.description)} />
+            {f.description && (
+              <button
+                type="button"
+                onClick={() => setF((p) => ({ ...p, description: "" }))}
+                className="mt-1.5 text-[13px] text-soft underline decoration-1 underline-offset-4 hover:text-brass-text"
+              >
+                Delete description
+              </button>
+            )}
+          </>,
+          "Featured cards show the first line. Authors can't add or change it. Save changes to apply."
         )}
         {field("email", "Author email (private)", <input id={id("email")} type="email" value={f.email} onChange={set("email")} className={inputClass(errors.email)} />)}
         {field("phone", "Author phone (private)", <input id={id("phone")} type="tel" value={f.phone} onChange={set("phone")} className={inputClass(errors.phone)} />)}

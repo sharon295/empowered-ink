@@ -56,6 +56,11 @@ model Book {
   placement            Placement?
   placementMonth       String?    // "YYYY-MM", America/Denver
 
+  // Which shareable form link an author used ("featured", "new_on_shelf" or
+  // "list"). Only a suggestion for the owner's approve controls; it never
+  // places a book by itself.
+  requestedPlacement   String?
+
   // Derived fields, recomputed on every create/edit (lib/derive.ts).
   sortTitle            String     @default("")
   searchText           String     @default("")

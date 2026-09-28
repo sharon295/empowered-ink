@@ -2,39 +2,40 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
-import { countWords } from "@/lib/validation";
+import type { SubmissionType } from "@/lib/submission-types";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
 type FieldErrors = Record<string, string>;
 
-export default function SubmissionForm({ categories }: { categories: string[] }) {
+// Authors send the essentials only: who they are, the book, where to buy it,
+// and one category. The owner adds any description or extra categories in
+// /admin when approving.
+export default function SubmissionForm({
+  categories,
+  type,
+  embedded,
+}: {
+  categories: string[];
+  type: SubmissionType | null;
+  embedded: boolean;
+}) {
   const router = useRouter();
 
   const [author, setAuthor] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
   const [purchaseLink, setPurchaseLink] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverError, setCoverError] = useState("");
-
-  const [primaryCategory, setPrimaryCategory] = useState("");
-  const [secondaryCategories, setSecondaryCategories] = useState<string[]>(["", ""]);
+  const [category, setCategory] = useState("");
   const [otherCategoryLabel, setOtherCategoryLabel] = useState("");
-
   const [consent, setConsent] = useState(false);
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
-
-  const wordCount = countWords(description);
-  const needsOther =
-    primaryCategory === "Other" || secondaryCategories.filter(Boolean).includes("Other");
-  const activeSecondary = secondaryCategories.filter((c) => c && c !== primaryCategory);
 
   function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -46,14 +47,6 @@ export default function SubmissionForm({ categories }: { categories: string[] })
     }
     setCoverError("");
     setCoverFile(file);
-  }
-
-  function updateSecondary(idx: number, value: string) {
-    setSecondaryCategories((prev) => {
-      const next = [...prev];
-      next[idx] = value;
-      return next;
-    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -74,8 +67,8 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         nextErrors.purchaseLink = "Enter a valid URL, including https://";
       }
     }
-    if (!primaryCategory) nextErrors.primaryCategory = "Choose a primary category.";
-    if (needsOther && !otherCategoryLabel.trim())
+    if (!category) nextErrors.primaryCategory = "Choose a category.";
+    if (category === "Other" && !otherCategoryLabel.trim())
       nextErrors.otherCategoryLabel = "Please specify your book's genre or category.";
     if (!coverFile) nextErrors.coverImage = "A cover image is required.";
     if (!consent) nextErrors.consent = "You must agree to the terms to submit.";
@@ -92,12 +85,11 @@ export default function SubmissionForm({ categories }: { categories: string[] })
       fd.set("email", email);
       fd.set("phone", phone);
       fd.set("title", title);
-      fd.set("description", description);
       fd.set("purchaseLink", purchaseLink);
-      fd.set("primaryCategory", primaryCategory);
-      fd.set("secondaryCategories", JSON.stringify(activeSecondary));
-      fd.set("otherCategoryLabel", otherCategoryLabel);
+      fd.set("primaryCategory", category);
+      fd.set("otherCategoryLabel", category === "Other" ? otherCategoryLabel : "");
       fd.set("consent", String(consent));
+      if (type) fd.set("type", type);
       if (coverFile) fd.set("coverImage", coverFile);
 
       const res = await fetch("/api/submit", { method: "POST", body: fd });
@@ -115,7 +107,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         return;
       }
 
-      router.push("/book-feature-submission-form/thank-you");
+      router.push(`/book-feature-submission-form/thank-you${embedded ? "?embed=1" : ""}`);
     } catch {
       setSubmitError("Something went wrong submitting your book. Please try again.");
       setSubmitting(false);
@@ -125,12 +117,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
   return (
     <form onSubmit={handleSubmit} noValidate className="mx-auto max-w-2xl px-8 py-14">
       <FormField label="Author's Name" htmlFor="author" error={errors.author}>
-        <input
-          id="author"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          className={inputClass(!!errors.author)}
-        />
+        <input id="author" value={author} onChange={(e) => setAuthor(e.target.value)} className={inputClass(!!errors.author)} />
       </FormField>
 
       <FormField label="Email" htmlFor="email" error={errors.email}>
@@ -156,25 +143,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
       </FormField>
 
       <FormField label="Book Title" htmlFor="title" error={errors.title}>
-        <input
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className={inputClass(!!errors.title)}
-        />
-      </FormField>
-
-      <FormField label="Book Description (optional)" htmlFor="description" error={errors.description}>
-        <textarea
-          id="description"
-          rows={5}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          className={inputClass(!!errors.description)}
-        />
-        <p className="mt-1 text-[11.5px] text-muted-text">
-          {wordCount} word{wordCount === 1 ? "" : "s"} · 75–100 words works best
-        </p>
+        <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass(!!errors.title)} />
       </FormField>
 
       <FormField label="Book Cover Image" htmlFor="coverImage" error={errors.coverImage || coverError}>
@@ -199,11 +168,11 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         />
       </FormField>
 
-      <FormField label="Primary Category" htmlFor="primaryCategory" error={errors.primaryCategory}>
+      <FormField label="Category" htmlFor="primaryCategory" error={errors.primaryCategory}>
         <select
           id="primaryCategory"
-          value={primaryCategory}
-          onChange={(e) => setPrimaryCategory(e.target.value)}
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
           className={inputClass(!!errors.primaryCategory)}
         >
           <option value="">Select a category…</option>
@@ -215,33 +184,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         </select>
       </FormField>
 
-      <fieldset className="mb-6">
-        <legend className="label mb-1.5 block text-[14.5px] text-soft">More Categories (optional)</legend>
-        <div className="space-y-3">
-          {[0, 1].map((idx) => (
-            <select
-              key={idx}
-              aria-label={`Extra category ${idx + 1}`}
-              value={secondaryCategories[idx]}
-              onChange={(e) => updateSecondary(idx, e.target.value)}
-              className={inputClass(false)}
-            >
-              <option value="">Extra category {idx + 1}…</option>
-              {categories
-                .filter((c) => (c !== primaryCategory && !secondaryCategories.includes(c)) || c === secondaryCategories[idx])
-                .map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-            </select>
-          ))}
-        </div>
-        <p className="mt-1 text-[11.5px] text-muted-text">Up to 2 more, so readers can find your book under each.</p>
-        {errors.secondaryCategories && <p className="mt-1 text-[12px] text-red-700">{errors.secondaryCategories}</p>}
-      </fieldset>
-
-      {needsOther && (
+      {category === "Other" && (
         <FormField
           label="Please specify your book's genre or category."
           htmlFor="otherCategoryLabel"
@@ -258,12 +201,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
 
       <div className="mb-8">
         <label className="flex items-start gap-2.5 text-[13px] leading-relaxed text-soft">
-          <input
-            type="checkbox"
-            checked={consent}
-            onChange={(e) => setConsent(e.target.checked)}
-            className="mt-0.5"
-          />
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" />
           <span>
             I understand my book may be published in a different issue than submitted, I consent to being
             contacted about this submission, and I agree to the{" "}
