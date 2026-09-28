@@ -25,12 +25,15 @@ export default function AdminBookForm({
   currentMonth,
   initialPlacement,
   onDone,
+  afterCreate,
 }: {
   book?: AdminBook;
   categories: string[];
   currentMonth: string;
   initialPlacement?: PlacementValue;
   onDone?: () => void;
+  // Where to go after adding a book; the page reopens an empty form there.
+  afterCreate?: string;
 }) {
   const router = useRouter();
   const creating = !book;
@@ -98,7 +101,12 @@ export default function AdminBookForm({
       return;
     }
     if (creating) {
-      router.push("/admin?status=approved&added=1");
+      router.push(
+        afterCreate
+          ? `${afterCreate}&added=${encodeURIComponent(f.title.trim())}`
+          : "/admin?status=approved&added=1"
+      );
+      window.scrollTo(0, 0);
     } else {
       router.refresh();
       onDone?.();

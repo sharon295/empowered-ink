@@ -7,6 +7,7 @@ const LINKS = [
   { href: "/admin", key: "books", label: "Books" },
   { href: "/admin/add?placement=featured", key: "add-featured", label: "Add a Featured book" },
   { href: "/admin/add?placement=new", key: "add-new", label: "Add a New on the Shelf book" },
+  { href: "/admin/add?placement=list", key: "add-list", label: "Add to the A–Z list" },
   { href: "/admin/categories", key: "categories", label: "Categories" },
 ] as const;
 

@@ -77,7 +77,10 @@ without JavaScript. Component: `components/DirectoryClient.tsx`.
 - **Add a Featured book** — `/admin/add?placement=featured`
 - **Add a New on the Shelf book** — `/admin/add?placement=new`
 
-  Books added here are approved immediately. Pick a later month to schedule one.
+- **Add to the A–Z list** — `/admin/add?placement=list` (for books already on the site; no spotlight month)
+
+  Books added here are approved immediately, and the form reopens empty for the next one. Pick a later month to
+  schedule a Featured or New on the Shelf book.
 - **Categories** — rename (updates every book), add, and see how many books use each. This list feeds the
   submission form, validation and the directory's category buttons (a button only appears once a visible book
   uses the category).
