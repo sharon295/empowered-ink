@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CATEGORIES } from "@/lib/categories";
+
 import { countWords } from "@/lib/validation";
 
 const FEATURED_PRICE = 75;
@@ -11,7 +11,7 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
 type FieldErrors = Record<string, string>;
 
-export default function SubmissionForm() {
+export default function SubmissionForm({ categories }: { categories: string[] }) {
   const router = useRouter();
 
   const [author, setAuthor] = useState("");
@@ -163,7 +163,7 @@ export default function SubmissionForm() {
           onChange={(e) => setEmail(e.target.value)}
           className={inputClass(!!errors.email)}
         />
-        <p className="mt-1 text-[11.5px] text-[#8a7a86]">Never shown publicly.</p>
+        <p className="mt-1 text-[11.5px] text-muted-text">Never shown publicly.</p>
       </FormField>
 
       <FormField label="Phone" htmlFor="phone" error={errors.phone}>
@@ -174,7 +174,7 @@ export default function SubmissionForm() {
           onChange={(e) => setPhone(e.target.value)}
           className={inputClass(!!errors.phone)}
         />
-        <p className="mt-1 text-[11.5px] text-[#8a7a86]">Never shown publicly.</p>
+        <p className="mt-1 text-[11.5px] text-muted-text">Never shown publicly.</p>
       </FormField>
 
       <FormField label="Book Title" htmlFor="title" error={errors.title}>
@@ -200,7 +200,7 @@ export default function SubmissionForm() {
         />
         <p
           className={`mt-1 text-[11.5px] ${
-            isFeatured && (wordCount < 75 || wordCount > 100) ? "text-red-700" : "text-[#8a7a86]"
+            isFeatured && (wordCount < 75 || wordCount > 100) ? "text-red-700" : "text-muted-text"
           }`}
         >
           {wordCount} word{wordCount === 1 ? "" : "s"}
@@ -214,9 +214,9 @@ export default function SubmissionForm() {
           type="file"
           accept="image/png,image/jpeg"
           onChange={handleCoverChange}
-          className="block w-full text-[13px] file:mr-3 file:rounded-sm file:border-0 file:bg-deep-plum file:px-4 file:py-2 file:text-[12px] file:font-bold file:uppercase file:tracking-wide file:text-warm-white"
+          className="block w-full text-[13px] file:mr-3 file:border file:border-ink file:bg-ink file:px-4 file:py-2 file:text-[13px] file:text-ivory"
         />
-        <p className="mt-1 text-[11.5px] text-[#8a7a86]">JPG or PNG only.</p>
+        <p className="mt-1 text-[11.5px] text-muted-text">JPG or PNG only.</p>
       </FormField>
 
       <FormField label="Link to Purchase" htmlFor="purchaseLink" error={errors.purchaseLink}>
@@ -238,16 +238,16 @@ export default function SubmissionForm() {
           className={inputClass(!!errors.primaryCategory)}
         >
           <option value="">Select a category…</option>
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <option key={c} value={c}>
               {c}
             </option>
           ))}
         </select>
-        <p className="mt-1 text-[11.5px] text-[#8a7a86]">Included free with every listing.</p>
+        <p className="mt-1 text-[11.5px] text-muted-text">Included free with every listing.</p>
       </FormField>
 
-      <div className="mb-6 rounded-sm border border-deep-plum/20 bg-soft-lavender/40 p-4">
+      <div className="mb-6 border border-hairline bg-tint p-4">
         <label className="flex items-center gap-2.5 text-[13.5px] font-semibold">
           <input
             type="checkbox"
@@ -255,7 +255,7 @@ export default function SubmissionForm() {
             onChange={(e) => setAddCategories(e.target.checked)}
           />
           Add more categories?{" "}
-          <span className="font-normal text-[#6b5865]">
+          <span className="font-normal text-soft">
             {isFeatured ? "— included free with Featured Placement" : "— $35 for up to 2 more"}
           </span>
         </label>
@@ -270,7 +270,7 @@ export default function SubmissionForm() {
                 className={inputClass(false)}
               >
                 <option value="">Secondary category {idx + 1} (optional)…</option>
-                {CATEGORIES.filter(
+                {categories.filter(
                   (c) => c !== primaryCategory && !secondaryCategories.includes(c) || c === secondaryCategories[idx]
                 ).map((c) => (
                   <option key={c} value={c}>
@@ -301,7 +301,7 @@ export default function SubmissionForm() {
         </FormField>
       )}
 
-      <div className="mb-6 rounded-sm border border-champagne-gold/50 bg-blush-linen p-4">
+      <div className="mb-6 border border-brass bg-white p-4">
         <label className="flex items-center gap-2.5 text-[13.5px] font-semibold">
           <input
             type="checkbox"
@@ -314,7 +314,7 @@ export default function SubmissionForm() {
           />
           $75 to upgrade to Featured Placement
         </label>
-        <ul className="mt-3 space-y-1.5 pl-1 text-[12.5px] text-[#3f2a3a]">
+        <ul className="mt-3 space-y-1.5 pl-1 text-[12.5px] text-soft">
           <li>✓ Larger, upgraded cover image</li>
           <li>✓ All 3 categories included, free</li>
           <li>✓ Top-of-page placement above standard listings</li>
@@ -323,7 +323,7 @@ export default function SubmissionForm() {
       </div>
 
       <div className="mb-8">
-        <label className="flex items-start gap-2.5 text-[13px] leading-relaxed text-[#3f2a3a]">
+        <label className="flex items-start gap-2.5 text-[13px] leading-relaxed text-soft">
           <input
             type="checkbox"
             checked={consent}
@@ -351,7 +351,7 @@ export default function SubmissionForm() {
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-sm bg-champagne-gold px-6 py-3.5 text-center text-[13px] font-bold uppercase tracking-wider text-midnight-plum disabled:opacity-60"
+        className="w-full bg-ink px-6 py-3.5 text-center text-[14px] text-ivory hover:bg-brass-text disabled:opacity-60"
       >
         {submitting ? "Submitting…" : submitLabel}
       </button>
@@ -360,9 +360,9 @@ export default function SubmissionForm() {
 }
 
 function inputClass(hasError: boolean) {
-  return `w-full rounded-sm border ${
-    hasError ? "border-red-500" : "border-deep-plum/25"
-  } bg-white px-3.5 py-2.5 text-[13.5px] text-midnight-plum focus:outline focus:outline-1 focus:outline-deep-plum`;
+  return `w-full border ${
+    hasError ? "border-red-500" : "border-hairline"
+  } bg-white px-3.5 py-2.5 text-[13.5px] text-ink focus:border-ink focus:outline-none`;
 }
 
 function FormField({
@@ -378,7 +378,7 @@ function FormField({
 }) {
   return (
     <div className="mb-6">
-      <label htmlFor={htmlFor} className="mb-1.5 block text-[12.5px] font-semibold uppercase tracking-wide text-deep-plum">
+      <label htmlFor={htmlFor} className="label mb-1.5 block text-[14.5px] text-soft">
         {label}
       </label>
       {children}

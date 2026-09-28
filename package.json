@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/backfill.mjs && next start",
+    "db:backfill": "node scripts/backfill.mjs",
     "lint": "eslint"
   },
   "dependencies": {

@@ -1,26 +1,30 @@
 import SiteNav from "@/components/SiteNav";
 import SiteFooter from "@/components/SiteFooter";
 import SubmissionForm from "@/components/SubmissionForm";
+import { getCategoryNames } from "@/lib/categories";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Submit Your Book — Empowered Ink",
 };
 
-export default function SubmissionFormPage() {
+export default async function SubmissionFormPage() {
+  const categories = await getCategoryNames();
   return (
     <>
-      <SiteNav active="submit" />
-      <section className="bg-gradient-to-b from-midnight-plum to-deep-plum py-14 text-warm-white">
+      <SiteNav />
+      <section className="bg-ink py-14 text-ivory sm:py-18">
         <div className="mx-auto max-w-2xl px-8">
-          <div className="mb-3 flex items-center gap-2.5 text-[11.5px] uppercase tracking-[0.22em] text-champagne-gold-light">
-            <span className="h-px w-[34px] bg-champagne-gold-light" /> Submit Your Book
-          </div>
-          <h1 className="font-display text-[34px] font-medium leading-tight sm:text-[42px]">
-            Get your book in front of the Possible Woman community.
-          </h1>
+          <p className="label text-[15px] text-cover">Our Author Community</p>
+          <h1 className="font-display mt-2 text-[36px] italic leading-tight sm:text-[46px]">Submit Your Book</h1>
+          <p className="mt-4 max-w-xl text-[15px] leading-relaxed text-cover">
+            Get your book in front of the Possible Woman community. Every submission is reviewed before it appears
+            in Empowered Ink.
+          </p>
         </div>
       </section>
-      <SubmissionForm />
+      <SubmissionForm categories={categories} />
       <SiteFooter />
     </>
   );

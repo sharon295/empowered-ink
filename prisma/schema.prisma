@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -11,6 +11,20 @@ enum BookStatus {
   pending
   approved
   rejected
+}
+
+// Which spotlight section a book is placed in for its placementMonth.
+// null = no spotlight; the book only ever appears in the A–Z list.
+enum Placement {
+  featured
+  new_on_shelf
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
 }
 
 model Book {
@@ -29,10 +43,26 @@ model Book {
   featuredUntil        DateTime?
   status               BookStatus @default(pending)
   submittedAt          DateTime   @default(now())
+  updatedAt            DateTime   @default(now()) @updatedAt
+  approvedAt           DateTime?
 
   stripeSessionId      String?
   categoryAddonPaid    Boolean    @default(false)
 
+  // The section a book shows in is computed at read time from these two
+  // fields and the current America/Denver month (lib/sections.ts): before
+  // placementMonth the book is hidden, during it the book is in its section,
+  // and afterwards it is in the A–Z list. Nothing moves books on a schedule.
+  placement            Placement?
+  placementMonth       String?    // "YYYY-MM", America/Denver
+
+  // Derived fields, recomputed on every create/edit (lib/derive.ts).
+  sortTitle            String     @default("")
+  searchText           String     @default("")
+  categories           String[]   @default([])
+
   @@index([status])
   @@index([isFeatured, featuredUntil])
+  @@index([status, sortTitle, id])
+  @@index([placement, placementMonth])
 }

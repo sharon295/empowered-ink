@@ -3,6 +3,8 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { lastDayOfCurrentMonth } from "@/lib/categories";
+import { currentMonthKey } from "@/lib/month";
+import { refreshDerivedFields } from "@/lib/book-writes";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -30,10 +32,21 @@ export async function POST(req: Request) {
           // Featured bundles all 3 categories for free, so it also unlocks
           // categoryAddonPaid; categoryAddon is the separate $35 path for a
           // Standard listing (mutually exclusive with featured, see /api/submit).
-          ...(featured ? { isFeatured: true, featuredUntil: lastDayOfCurrentMonth(), categoryAddonPaid: true } : {}),
+          // The paid month becomes the book's Featured placement; the owner can
+          // move it to another month in /admin.
+          ...(featured
+            ? {
+                isFeatured: true,
+                featuredUntil: lastDayOfCurrentMonth(),
+                categoryAddonPaid: true,
+                placement: "featured" as const,
+                placementMonth: currentMonthKey(),
+              }
+            : {}),
           ...(categoryAddon ? { categoryAddonPaid: true } : {}),
         },
       });
+      await refreshDerivedFields(bookId);
     }
   }
 

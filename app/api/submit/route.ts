@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe";
 import { uploadCoverImage } from "@/lib/cloudinary";
 import { submitBookSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validation";
-import { FEATURED_PRICE_CENTS, CATEGORY_ADDON_PRICE_CENTS } from "@/lib/categories";
+import { FEATURED_PRICE_CENTS, CATEGORY_ADDON_PRICE_CENTS, getCategoryNames } from "@/lib/categories";
+import { derivedFields } from "@/lib/normalize.mjs";
 
 export async function POST(req: Request) {
   const form = await req.formData();
@@ -23,7 +24,7 @@ export async function POST(req: Request) {
     consent: form.get("consent") === "true",
   };
 
-  const parsed = submitBookSchema.safeParse(raw);
+  const parsed = submitBookSchema(await getCategoryNames()).safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json({ error: "validation", issues: parsed.error.issues }, { status: 400 });
   }
@@ -70,6 +71,14 @@ export async function POST(req: Request) {
       featuredUntil: null,
       categoryAddonPaid: false,
       status: "pending",
+      ...derivedFields({
+        title: data.title,
+        author: data.author,
+        primaryCategory: data.primaryCategory,
+        secondaryCategories: JSON.stringify(data.secondaryCategories),
+        categoryAddonPaid: false,
+        otherCategoryLabel: data.otherCategoryLabel || null,
+      }),
     },
   });
 

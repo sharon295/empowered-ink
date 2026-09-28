@@ -1,13 +1,14 @@
 import { z } from "zod";
-import { CATEGORIES } from "./categories";
 
 export function countWords(text: string): number {
   return text.trim().length === 0 ? 0 : text.trim().split(/\s+/).length;
 }
 
-const categoryEnum = z.enum(CATEGORIES);
-
-export const submitBookSchema = z
+// Built per request from the current category list (lib/categories.ts), so
+// categories renamed or added in /admin are accepted immediately.
+export const submitBookSchema = (categories: string[]) => {
+  const categoryEnum = z.string().refine((c) => categories.includes(c), "Choose a category from the list.");
+  return z
   .object({
     author: z.string().trim().min(1, "Author's name is required"),
     email: z.string().trim().email("Enter a valid email"),
@@ -57,7 +58,8 @@ export const submitBookSchema = z
       });
     }
   });
+};
 
-export type SubmitBookInput = z.infer<typeof submitBookSchema>;
+export type SubmitBookInput = z.infer<ReturnType<typeof submitBookSchema>>;
 
 export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
