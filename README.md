@@ -4,12 +4,13 @@ Book directory and submission flow for [Possible Woman Magazine](https://possibl
 
 - `/empowered-ink` — the directory, built to be **embedded** in the magazine page between its own header, hero
   and footer (see [Embedding](#embedding-on-the-magazine-site)).
-- `/book-feature-submission-form` — the author submission form (Standard / Featured / category add-on via Stripe).
+- `/book-feature-submission-form` — the free author submission form. Every submission waits in `/admin` as
+  pending until the owner approves it and chooses where it shows.
 - `/admin` — the owner's review and editing screens, behind a single password.
 
 ## Stack
 
-Next.js (App Router) + TypeScript + Tailwind v4 + Prisma + Postgres + Stripe + Cloudinary (with a local-disk
+Next.js (App Router) + TypeScript + Tailwind v4 + Prisma + Postgres + Cloudinary (with a local-disk
 fallback for covers).
 
 ## Local development
@@ -42,9 +43,8 @@ nothing is edited when a month rolls over.
 | an earlier month, or no placement | **All Empowered Ink Books** (A to Z) |
 
 - The owner chooses the section and month in `/admin` when approving or adding a book, and can change either at
-  any time. Approving defaults to New on the Shelf for the current month (a paid Featured listing keeps Featured).
-- A paid Featured purchase (Stripe webhook) sets Featured for the month it was paid in, ending 23:59:59 on the last
-  day of that month, Denver time.
+  any time. Approving defaults to New on the Shelf for the current month. There is no payment: placement is always
+  the owner's choice.
 - With a search or category active, both spotlight sections are hidden and every visible book is searched in one
   A–Z list, so a reader looking for a featured or new title always finds it.
 - Empty sections are hidden. New on the Shelf shows 12 books, then "Show all N new books".
@@ -99,7 +99,6 @@ page so continuous scroll and "Back to top" work, copies `?q=` / `?category=` in
 so searches can be shared, and returns the reader to the same place when they come back.
 
 "Learn more" opens the book's link in a new tab; "Submit Your Book" opens the submission form in the whole window.
-The submission form is a normal page (not embedded), because Stripe Checkout can't run inside an iframe.
 
 ## Deploying to Render
 
@@ -109,15 +108,15 @@ The submission form is a normal page (not embedded), because Stripe Checkout can
    - Start command: `npm run start` (runs the backfill, then the app)
 3. **Environment variables** (Render dashboard → Environment — never commit these):
    - `DATABASE_URL` — the Render Postgres connection string
-   - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` — from Stripe (live keys for production)
    - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` — or leave unset and attach a disk at
      `/opt/render/project/src/public/uploads`
    - `ADMIN_PASSWORD` — password for `/admin`; optionally `ADMIN_SESSION_SECRET` to sign sessions with a
      separate secret
-   - `NEXT_PUBLIC_SITE_URL` — the service's public URL (Stripe redirects)
    - `NEXT_PUBLIC_DIRECTORY_PAGE_URL` — the magazine page that embeds the directory ("Back to the Directory")
-4. **Point Stripe's webhook** at `https://<your-render-url>/api/webhooks/stripe` for `checkout.session.completed`.
+
+Any Stripe variables or webhook left over from the earlier version can be deleted; the app no longer uses them.
 
 The `directory_sections` migration only adds columns and a table. It stamps existing approved books as approved on
-their submission date and keeps any still-running paid Featured listing in Featured, so no existing book shows up
-as New on the Shelf.
+their submission date and keeps any Featured listing that is still running in Featured, so no existing book shows
+up as New on the Shelf. The old Stripe columns (`stripeSessionId`, `categoryAddonPaid`) stay in the table so no data
+is lost; `categoryAddonPaid` now just means "show the extra categories".

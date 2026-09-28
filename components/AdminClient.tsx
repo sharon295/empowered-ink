@@ -158,10 +158,6 @@ export default function AdminClient({
                   {b.status !== "approved" && (
                     <span className="border border-hairline px-2 py-1 text-[12px] capitalize text-soft">{b.status}</span>
                   )}
-                  {b.paidFeatured && <span className="px-2 py-1 text-[12px] text-brass-text">Paid Featured</span>}
-                  {b.categoryAddonPaid && b.secondaryCategories.length > 0 && (
-                    <span className="px-2 py-1 text-[12px] text-brass-text">Extra categories</span>
-                  )}
                 </div>
                 <p className="mt-0.5 text-[14px] text-soft">by {b.author}</p>
                 <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-[12.5px] text-muted-text">

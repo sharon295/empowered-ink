@@ -166,7 +166,7 @@ export default function AdminBookForm({
         </div>
         <label className="mb-4 flex items-start gap-2 text-[13.5px] text-soft">
           <input type="checkbox" checked={f.categoryAddonPaid} onChange={set("categoryAddonPaid")} className="mt-1" />
-          Show the extra categories publicly (paid add-on, or included with Featured)
+          Show the extra categories on the directory
         </label>
         {usesOther &&
           field(

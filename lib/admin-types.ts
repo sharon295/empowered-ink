@@ -20,7 +20,6 @@ export type AdminBook = {
   placementMonth: string | null;
   approvedAt: string | null;
   submittedAt: string;
-  paidFeatured: boolean;
   section: Section;
 };
 
@@ -43,7 +42,6 @@ export function toAdminBook(book: Book, section: Section): AdminBook {
     placementMonth: book.placementMonth,
     approvedAt: book.approvedAt?.toISOString() ?? null,
     submittedAt: book.submittedAt.toISOString(),
-    paidFeatured: Boolean(book.stripeSessionId && book.isFeatured),
     section,
   };
 }

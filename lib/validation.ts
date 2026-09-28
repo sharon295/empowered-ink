@@ -19,8 +19,6 @@ export const submitBookSchema = (categories: string[]) => {
     primaryCategory: categoryEnum,
     secondaryCategories: z.array(categoryEnum).max(2).default([]),
     otherCategoryLabel: z.string().trim().optional().default(""),
-    isFeatured: z.coerce.boolean().default(false),
-    addCategories: z.coerce.boolean().default(false),
     consent: z.coerce.boolean(),
   })
   .superRefine((data, ctx) => {
@@ -32,23 +30,6 @@ export const submitBookSchema = (categories: string[]) => {
         path: ["otherCategoryLabel"],
         message: "Please specify your book's genre or category.",
       });
-    }
-    if (data.addCategories && !data.isFeatured && data.secondaryCategories.length === 0) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["secondaryCategories"],
-        message: "Choose at least one secondary category, or turn the toggle off.",
-      });
-    }
-    if (data.isFeatured) {
-      const words = countWords(data.description);
-      if (words < 75 || words > 100) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["description"],
-          message: "Featured listings require a 75–100 word description.",
-        });
-      }
     }
     if (!data.consent) {
       ctx.addIssue({

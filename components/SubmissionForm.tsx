@@ -1,12 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { countWords } from "@/lib/validation";
 
-const FEATURED_PRICE = 75;
-const ADDON_PRICE = 35;
 const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
 type FieldErrors = Record<string, string>;
@@ -24,11 +22,9 @@ export default function SubmissionForm({ categories }: { categories: string[] })
   const [coverError, setCoverError] = useState("");
 
   const [primaryCategory, setPrimaryCategory] = useState("");
-  const [addCategories, setAddCategories] = useState(false);
   const [secondaryCategories, setSecondaryCategories] = useState<string[]>(["", ""]);
   const [otherCategoryLabel, setOtherCategoryLabel] = useState("");
 
-  const [isFeatured, setIsFeatured] = useState(false);
   const [consent, setConsent] = useState(false);
 
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -38,15 +34,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
   const wordCount = countWords(description);
   const needsOther =
     primaryCategory === "Other" || secondaryCategories.filter(Boolean).includes("Other");
-  const activeSecondary = secondaryCategories.filter(Boolean);
-
-  const total =
-    (isFeatured ? FEATURED_PRICE : 0) +
-    (addCategories && activeSecondary.length > 0 && !isFeatured ? ADDON_PRICE : 0);
-  const submitLabel = useMemo(() => {
-    if (total === 0) return "Submit for Free";
-    return `Submit & Pay $${total}`;
-  }, [total]);
+  const activeSecondary = secondaryCategories.filter((c) => c && c !== primaryCategory);
 
   function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0] ?? null;
@@ -89,10 +77,6 @@ export default function SubmissionForm({ categories }: { categories: string[] })
     if (!primaryCategory) nextErrors.primaryCategory = "Choose a primary category.";
     if (needsOther && !otherCategoryLabel.trim())
       nextErrors.otherCategoryLabel = "Please specify your book's genre or category.";
-    if (addCategories && !isFeatured && activeSecondary.length === 0)
-      nextErrors.secondaryCategories = "Choose at least one secondary category, or turn this off.";
-    if (isFeatured && (wordCount < 75 || wordCount > 100))
-      nextErrors.description = `Featured listings require a 75–100 word description (currently ${wordCount}).`;
     if (!coverFile) nextErrors.coverImage = "A cover image is required.";
     if (!consent) nextErrors.consent = "You must agree to the terms to submit.";
 
@@ -111,10 +95,8 @@ export default function SubmissionForm({ categories }: { categories: string[] })
       fd.set("description", description);
       fd.set("purchaseLink", purchaseLink);
       fd.set("primaryCategory", primaryCategory);
-      fd.set("secondaryCategories", JSON.stringify(addCategories ? activeSecondary : []));
+      fd.set("secondaryCategories", JSON.stringify(activeSecondary));
       fd.set("otherCategoryLabel", otherCategoryLabel);
-      fd.set("isFeatured", String(isFeatured));
-      fd.set("addCategories", String(addCategories));
       fd.set("consent", String(consent));
       if (coverFile) fd.set("coverImage", coverFile);
 
@@ -133,11 +115,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         return;
       }
 
-      if (json.free) {
-        router.push("/book-feature-submission-form/thank-you");
-      } else if (json.checkoutUrl) {
-        window.location.href = json.checkoutUrl;
-      }
+      router.push("/book-feature-submission-form/thank-you");
     } catch {
       setSubmitError("Something went wrong submitting your book. Please try again.");
       setSubmitting(false);
@@ -186,11 +164,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         />
       </FormField>
 
-      <FormField
-        label={`Book Description${isFeatured ? " (required, 75–100 words)" : " (optional)"}`}
-        htmlFor="description"
-        error={errors.description}
-      >
+      <FormField label="Book Description (optional)" htmlFor="description" error={errors.description}>
         <textarea
           id="description"
           rows={5}
@@ -198,13 +172,8 @@ export default function SubmissionForm({ categories }: { categories: string[] })
           onChange={(e) => setDescription(e.target.value)}
           className={inputClass(!!errors.description)}
         />
-        <p
-          className={`mt-1 text-[11.5px] ${
-            isFeatured && (wordCount < 75 || wordCount > 100) ? "text-red-700" : "text-muted-text"
-          }`}
-        >
-          {wordCount} word{wordCount === 1 ? "" : "s"}
-          {isFeatured ? " · 75–100 required for Featured listings" : ""}
+        <p className="mt-1 text-[11.5px] text-muted-text">
+          {wordCount} word{wordCount === 1 ? "" : "s"} · 75–100 words works best
         </p>
       </FormField>
 
@@ -244,47 +213,33 @@ export default function SubmissionForm({ categories }: { categories: string[] })
             </option>
           ))}
         </select>
-        <p className="mt-1 text-[11.5px] text-muted-text">Included free with every listing.</p>
       </FormField>
 
-      <div className="mb-6 border border-hairline bg-tint p-4">
-        <label className="flex items-center gap-2.5 text-[13.5px] font-semibold">
-          <input
-            type="checkbox"
-            checked={addCategories}
-            onChange={(e) => setAddCategories(e.target.checked)}
-          />
-          Add more categories?{" "}
-          <span className="font-normal text-soft">
-            {isFeatured ? "— included free with Featured Placement" : "— $35 for up to 2 more"}
-          </span>
-        </label>
-
-        {addCategories && (
-          <div className="mt-4 space-y-3">
-            {[0, 1].map((idx) => (
-              <select
-                key={idx}
-                value={secondaryCategories[idx]}
-                onChange={(e) => updateSecondary(idx, e.target.value)}
-                className={inputClass(false)}
-              >
-                <option value="">Secondary category {idx + 1} (optional)…</option>
-                {categories.filter(
-                  (c) => c !== primaryCategory && !secondaryCategories.includes(c) || c === secondaryCategories[idx]
-                ).map((c) => (
+      <fieldset className="mb-6">
+        <legend className="label mb-1.5 block text-[14.5px] text-soft">More Categories (optional)</legend>
+        <div className="space-y-3">
+          {[0, 1].map((idx) => (
+            <select
+              key={idx}
+              aria-label={`Extra category ${idx + 1}`}
+              value={secondaryCategories[idx]}
+              onChange={(e) => updateSecondary(idx, e.target.value)}
+              className={inputClass(false)}
+            >
+              <option value="">Extra category {idx + 1}…</option>
+              {categories
+                .filter((c) => (c !== primaryCategory && !secondaryCategories.includes(c)) || c === secondaryCategories[idx])
+                .map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
                 ))}
-              </select>
-            ))}
-            {errors.secondaryCategories && (
-              <p className="text-[12px] text-red-700">{errors.secondaryCategories}</p>
-            )}
-          </div>
-        )}
-      </div>
+            </select>
+          ))}
+        </div>
+        <p className="mt-1 text-[11.5px] text-muted-text">Up to 2 more, so readers can find your book under each.</p>
+        {errors.secondaryCategories && <p className="mt-1 text-[12px] text-red-700">{errors.secondaryCategories}</p>}
+      </fieldset>
 
       {needsOther && (
         <FormField
@@ -300,27 +255,6 @@ export default function SubmissionForm({ categories }: { categories: string[] })
           />
         </FormField>
       )}
-
-      <div className="mb-6 border border-brass bg-white p-4">
-        <label className="flex items-center gap-2.5 text-[13.5px] font-semibold">
-          <input
-            type="checkbox"
-            checked={isFeatured}
-            onChange={(e) => {
-              const checked = e.target.checked;
-              setIsFeatured(checked);
-              if (checked) setAddCategories(true);
-            }}
-          />
-          $75 to upgrade to Featured Placement
-        </label>
-        <ul className="mt-3 space-y-1.5 pl-1 text-[12.5px] text-soft">
-          <li>✓ Larger, upgraded cover image</li>
-          <li>✓ All 3 categories included, free</li>
-          <li>✓ Top-of-page placement above standard listings</li>
-          <li>✓ Runs through the end of this month</li>
-        </ul>
-      </div>
 
       <div className="mb-8">
         <label className="flex items-start gap-2.5 text-[13px] leading-relaxed text-soft">
@@ -353,7 +287,7 @@ export default function SubmissionForm({ categories }: { categories: string[] })
         disabled={submitting}
         className="w-full bg-ink px-6 py-3.5 text-center text-[14px] text-ivory hover:bg-brass-text disabled:opacity-60"
       >
-        {submitting ? "Submitting…" : submitLabel}
+        {submitting ? "Submitting…" : "Submit Your Book"}
       </button>
     </form>
   );
