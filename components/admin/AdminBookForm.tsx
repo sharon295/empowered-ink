@@ -45,10 +45,7 @@ export default function AdminBookForm({
     description: book?.description ?? "",
     purchaseLink: book?.purchaseLink ?? "",
     primaryCategory: book?.primaryCategory ?? "",
-    secondary1: book?.secondaryCategories[0] ?? "",
-    secondary2: book?.secondaryCategories[1] ?? "",
     otherCategoryLabel: book?.otherCategoryLabel ?? "",
-    categoryAddonPaid: book?.categoryAddonPaid ?? true,
     approvedAt: toLocalInput(book?.approvedAt ?? null),
   });
   const [placement, setPlacement] = useState<PlacementValue>(
@@ -65,8 +62,8 @@ export default function AdminBookForm({
   const set = (key: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setF((prev) => ({ ...prev, [key]: e.target.type === "checkbox" ? (e.target as HTMLInputElement).checked : e.target.value }));
 
-  const allCategories = [...new Set([...categories, f.primaryCategory, f.secondary1, f.secondary2].filter(Boolean))];
-  const usesOther = [f.primaryCategory, f.secondary1, f.secondary2].includes("Other");
+  const allCategories = [...new Set([...categories, f.primaryCategory].filter(Boolean))];
+  const usesOther = f.primaryCategory === "Other";
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -78,9 +75,9 @@ export default function AdminBookForm({
     for (const key of ["title", "author", "email", "phone", "description", "purchaseLink", "primaryCategory", "otherCategoryLabel"] as const) {
       fd.set(key, f[key]);
     }
+    // One category per book: saving clears any extra categories left over
+    // from earlier versions.
     fd.set("secondaryCategories", "");
-    for (const c of [f.secondary1, f.secondary2]) if (c) fd.append("secondaryCategories", c);
-    fd.set("categoryAddonPaid", String(f.categoryAddonPaid));
     fd.set("placement", placement.placement ?? "");
     fd.set("placementMonth", placement.placementMonth ?? "");
     if (!creating) fd.set("approvedAt", f.approvedAt ? new Date(f.approvedAt).toISOString() : "");
@@ -159,34 +156,15 @@ export default function AdminBookForm({
       <div>
         {field(
           "primaryCategory",
-          "Primary category",
+          "Category",
           <select id={id("primaryCategory")} value={f.primaryCategory} onChange={set("primaryCategory")} className={inputClass(errors.primaryCategory)}>
             <option value="">Choose…</option>
             {allCategories.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
-          </select>
+          </select>,
+          "Each book has one category, which decides the category button it appears under."
         )}
-        <div className="mb-4 grid grid-cols-2 gap-3">
-          {(["secondary1", "secondary2"] as const).map((key, n) => (
-            <div key={key}>
-              <label htmlFor={id(key)} className="label mb-1 block text-[14px] text-soft">
-                Extra category {n + 1}
-              </label>
-              <select id={id(key)} value={f[key]} onChange={set(key)} className={inputClass()}>
-                <option value="">None</option>
-                {allCategories.filter((c) => c !== f.primaryCategory).map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-          ))}
-          {errors.secondaryCategories && <p className="col-span-2 text-[12.5px] text-red-700">{errors.secondaryCategories}</p>}
-        </div>
-        <label className="mb-4 flex items-start gap-2 text-[13.5px] text-soft">
-          <input type="checkbox" checked={f.categoryAddonPaid} onChange={set("categoryAddonPaid")} className="mt-1" />
-          Show the extra categories on the directory
-        </label>
         {usesOther &&
           field(
             "otherCategoryLabel",

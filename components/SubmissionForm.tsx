@@ -30,7 +30,6 @@ export default function SubmissionForm({
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverError, setCoverError] = useState("");
   const [category, setCategory] = useState("");
-  const [otherCategoryLabel, setOtherCategoryLabel] = useState("");
   const [consent, setConsent] = useState(false);
 
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -68,8 +67,6 @@ export default function SubmissionForm({
       }
     }
     if (!category) nextErrors.primaryCategory = "Choose a category.";
-    if (category === "Other" && !otherCategoryLabel.trim())
-      nextErrors.otherCategoryLabel = "Please specify your book's genre or category.";
     if (!coverFile) nextErrors.coverImage = "A cover image is required.";
     if (!consent) nextErrors.consent = "You must agree to the terms to submit.";
 
@@ -87,7 +84,6 @@ export default function SubmissionForm({
       fd.set("title", title);
       fd.set("purchaseLink", purchaseLink);
       fd.set("primaryCategory", category);
-      fd.set("otherCategoryLabel", category === "Other" ? otherCategoryLabel : "");
       fd.set("consent", String(consent));
       if (type) fd.set("type", type);
       if (coverFile) fd.set("coverImage", coverFile);
@@ -183,21 +179,6 @@ export default function SubmissionForm({
           ))}
         </select>
       </FormField>
-
-      {category === "Other" && (
-        <FormField
-          label="Please specify your book's genre or category."
-          htmlFor="otherCategoryLabel"
-          error={errors.otherCategoryLabel}
-        >
-          <input
-            id="otherCategoryLabel"
-            value={otherCategoryLabel}
-            onChange={(e) => setOtherCategoryLabel(e.target.value)}
-            className={inputClass(!!errors.otherCategoryLabel)}
-          />
-        </FormField>
-      )}
 
       <div className="mb-8">
         <label className="flex items-start gap-2.5 text-[13px] leading-relaxed text-soft">

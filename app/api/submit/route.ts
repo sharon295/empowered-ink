@@ -21,7 +21,6 @@ export async function POST(req: Request) {
     title: String(form.get("title") ?? ""),
     purchaseLink: String(form.get("purchaseLink") ?? ""),
     primaryCategory: String(form.get("primaryCategory") ?? ""),
-    otherCategoryLabel: String(form.get("otherCategoryLabel") ?? ""),
     consent: form.get("consent") === "true",
   };
 
@@ -55,10 +54,10 @@ export async function POST(req: Request) {
     title: data.title,
     author: data.author,
     primaryCategory: data.primaryCategory,
+    // One category per book.
     secondaryCategories: "[]",
-    // Extra categories the owner adds in /admin show without a further step.
-    categoryAddonPaid: true,
-    otherCategoryLabel: data.primaryCategory === "Other" ? data.otherCategoryLabel || null : null,
+    categoryAddonPaid: false,
+    otherCategoryLabel: null,
   };
 
   const book = await prisma.book.create({

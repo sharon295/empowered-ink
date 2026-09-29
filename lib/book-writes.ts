@@ -141,11 +141,9 @@ export async function renameCategory(from: string, to: string) {
 }
 
 export async function categoryUsage(): Promise<Record<string, number>> {
-  const books = await prisma.book.findMany({ select: { primaryCategory: true, secondaryCategories: true } });
+  // One category per book, so a book counts only toward its own category.
+  const books = await prisma.book.findMany({ select: { primaryCategory: true } });
   const counts: Record<string, number> = {};
-  for (const b of books) {
-    const names = new Set([b.primaryCategory, ...(JSON.parse(b.secondaryCategories || "[]") as string[])]);
-    for (const n of names) counts[n] = (counts[n] ?? 0) + 1;
-  }
+  for (const b of books) counts[b.primaryCategory] = (counts[b.primaryCategory] ?? 0) + 1;
   return counts;
 }
