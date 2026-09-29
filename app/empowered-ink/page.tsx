@@ -45,7 +45,7 @@ export default async function EmpoweredInkPage({ searchParams }: PageProps<"/emp
           <p className="mt-3 max-w-2xl text-[14px] text-soft">
             Featured listings rotate monthly and move into the full list when the month ends.
           </p>
-          <ul className="mt-9 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-9 grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 desk:grid-cols-3">
             {spotlight.featured.map((book) => (
               <li key={book.id}>
                 <BookCard book={book} size="featured" eager />
