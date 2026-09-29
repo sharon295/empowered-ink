@@ -23,11 +23,11 @@ export default function FeaturedDescription({ text, title }: { text: string; tit
   const id = useId();
   const preview = previewOf(text);
 
-  if (!preview) return <p className="text-[13px] leading-snug text-soft">{text.trim()}</p>;
+  if (!preview) return <p className="text-[12.5px] leading-snug text-soft">{text.trim()}</p>;
 
   return (
     <div>
-      <p id={id} className="text-[13px] leading-snug text-soft">
+      <p id={id} className="text-[12.5px] leading-snug text-soft">
         {open ? text.trim() : `${preview}…`}
       </p>
       <button
@@ -35,7 +35,7 @@ export default function FeaturedDescription({ text, title }: { text: string; tit
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((v) => !v)}
-        className="mt-0.5 text-[12.5px] text-brass-text underline decoration-1 underline-offset-4 hover:text-ink"
+        className="mt-0.5 text-[12px] text-brass-text underline decoration-1 underline-offset-4 hover:text-ink"
       >
         {open ? "Show less" : "Read more"}
         <span className="sr-only"> about {title}</span>
