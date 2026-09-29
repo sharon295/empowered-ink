@@ -172,7 +172,7 @@ export default function AdminClient({
                 <dl className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-[12.5px] text-muted-text">
                   <div><dt className="inline">Submitted </dt><dd className="inline">{formatDate(b.submittedAt)}</dd></div>
                   <div><dt className="inline">Approved </dt><dd className="inline">{formatDate(b.approvedAt)}</dd></div>
-                  <div><dt className="inline">Categories </dt><dd className="inline">{[b.primaryCategory, ...b.secondaryCategories].join(", ")}</dd></div>
+                  <div><dt className="inline">Category </dt><dd className="inline">{b.primaryCategory}</dd></div>
                   {b.email && <div><dt className="sr-only">Email</dt><dd className="inline">{b.email}</dd></div>}
                   {b.phone && <div><dt className="sr-only">Phone</dt><dd className="inline">{b.phone}</dd></div>}
                 </dl>

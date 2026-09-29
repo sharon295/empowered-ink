@@ -16,17 +16,9 @@ export const submitBookSchema = (categories: string[]) => {
     title: z.string().trim().min(1, "Book title is required"),
     purchaseLink: z.string().trim().url("Enter a valid purchase URL"),
     primaryCategory: categoryEnum,
-    otherCategoryLabel: z.string().trim().optional().default(""),
     consent: z.coerce.boolean(),
   })
   .superRefine((data, ctx) => {
-    if (data.primaryCategory === "Other" && !data.otherCategoryLabel.trim()) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["otherCategoryLabel"],
-        message: "Please specify your book's genre or category.",
-      });
-    }
     if (!data.consent) {
       ctx.addIssue({
         code: "custom",
