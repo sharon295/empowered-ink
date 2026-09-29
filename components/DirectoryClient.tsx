@@ -284,14 +284,14 @@ export default function DirectoryClient({
 
       <section aria-labelledby="all-books-heading" className="mx-auto max-w-[1200px] px-4 py-14 sm:px-8 sm:py-20">
         <div ref={listTopRef} className="scroll-mt-4">
-          <p className="label text-[15px] text-brass-text">The Full Collection</p>
-          <h2 id="all-books-heading" className="font-display mt-1 text-[30px] leading-tight sm:text-[38px]">
+          <p className="label text-[13px] text-brass-text">The Full Collection</p>
+          <h2 id="all-books-heading" className="font-display mt-1 text-[24px] leading-tight sm:text-[30px]">
             All Empowered Ink Books
           </h2>
         </div>
 
-        <div className="mt-8 border-y border-hairline py-6">
-          <label htmlFor="ei-search" className="label block text-[15px] text-soft">
+        <div className="mt-6 border-y border-hairline py-5">
+          <label htmlFor="ei-search" className="label block text-[13px] text-soft">
             Search books
           </label>
           <input
@@ -302,7 +302,7 @@ export default function DirectoryClient({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Title, author or category"
             autoComplete="off"
-            className="mt-2 w-full max-w-xl border border-hairline bg-white px-4 py-3 text-[15px] text-ink placeholder:text-muted-text focus:border-ink focus:outline-none"
+            className="mt-2 w-full max-w-xl border border-hairline bg-white px-3.5 py-2.5 text-[14px] text-ink placeholder:text-muted-text focus:border-ink focus:outline-none"
           />
 
           <div role="group" aria-label="Filter by category" className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
@@ -314,7 +314,7 @@ export default function DirectoryClient({
                   type="button"
                   aria-pressed={active}
                   onClick={() => setCategory(c)}
-                  className={`shrink-0 whitespace-nowrap border px-3.5 py-2 text-[13px] ${
+                  className={`shrink-0 whitespace-nowrap border px-3 py-1.5 text-[12.5px] ${
                     active
                       ? "border-ink bg-ink text-ivory"
                       : "border-hairline bg-transparent text-soft hover:border-brass hover:text-brass-text"
@@ -327,7 +327,7 @@ export default function DirectoryClient({
           </div>
         </div>
 
-        <p aria-live="polite" className="mt-5 text-[13px] text-muted-text">
+        <p aria-live="polite" className="mt-4 text-[12.5px] text-muted-text">
           {total === 0 && !refreshing
             ? ""
             : `Showing ${books.length} of ${total} ${total === 1 ? "book" : "books"} · A to Z by title`}
@@ -347,7 +347,7 @@ export default function DirectoryClient({
         ) : (
           <ul
             aria-busy={refreshing}
-            className={`mt-6 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 sm:gap-x-6 desk:grid-cols-6 desk:gap-x-5 ${
+            className={`mt-5 grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-6 desk:grid-cols-6 desk:gap-x-5 ${
               refreshing ? "opacity-50" : ""
             }`}
           >

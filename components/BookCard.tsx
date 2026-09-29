@@ -5,9 +5,9 @@ import FeaturedDescription from "./FeaturedDescription";
 type Size = "featured" | "shelf" | "compact";
 
 const STYLES: Record<Size, { title: string; author: string; label: string; gap: string; cover: string }> = {
-  featured: { title: "text-[20px] leading-tight", author: "text-[13.5px]", label: "text-[14.5px]", gap: "gap-2", cover: "text-[18px]" },
-  shelf: { title: "text-[17px] leading-snug", author: "text-[13px]", label: "text-[14px]", gap: "gap-1.5", cover: "text-[15px]" },
-  compact: { title: "text-[15px] leading-snug", author: "text-[12.5px]", label: "text-[13.5px]", gap: "gap-1", cover: "text-[13px]" },
+  featured: { title: "text-[18px] leading-tight", author: "text-[13px] leading-snug", label: "text-[13px] leading-tight", gap: "gap-1", cover: "text-[16px]" },
+  shelf: { title: "text-[15px] leading-tight", author: "text-[12.5px] leading-snug", label: "text-[12.5px] leading-tight", gap: "gap-1", cover: "text-[14px]" },
+  compact: { title: "text-[13.5px] leading-tight", author: "text-[12px] leading-snug", label: "text-[12px] leading-tight", gap: "gap-0.5", cover: "text-[12px]" },
 };
 
 // The whole card is one link to the book's page, opening in a new tab.
@@ -35,7 +35,7 @@ export default function BookCard({
             eager={eager}
             titleSize={s.cover}
           />
-          <span className={`flex flex-col pt-3 ${s.gap}`}>
+          <span className={`flex flex-col pt-2 ${s.gap}`}>
             <span className={`label text-brass-text ${s.label}`}>{book.categoryLabel}</span>
             <span className={`font-display text-ink group-hover:text-brass-text ${s.title}`}>{book.title}</span>
             <span className={`text-soft ${s.author}`}>By {book.author}</span>
@@ -53,7 +53,7 @@ export default function BookCard({
           rel="noopener noreferrer"
           aria-hidden="true"
           tabIndex={-1}
-          className="mt-auto self-start pt-3 text-[13px] underline decoration-1 underline-offset-4 hover:text-brass-text"
+          className="mt-auto self-start pt-2 text-[12.5px] underline decoration-1 underline-offset-4 hover:text-brass-text"
         >
           Learn more
         </a>
@@ -74,13 +74,13 @@ export default function BookCard({
         eager={eager}
         titleSize={s.cover}
       />
-      <div className={`flex flex-1 flex-col pt-3 ${s.gap}`}>
+      <div className={`flex flex-1 flex-col pt-2 ${s.gap}`}>
         <span className={`label text-brass-text ${s.label}`}>{book.categoryLabel}</span>
         <span className={`font-display text-ink group-hover:text-brass-text ${s.title}`}>{book.title}</span>
         <span className={`text-soft ${s.author}`}>{book.author}</span>
         <span
-          className={`mt-auto pt-1.5 underline decoration-1 underline-offset-4 group-hover:text-brass-text ${
-            size === "compact" ? "text-[12.5px]" : "text-[13px]"
+          className={`mt-auto pt-1 underline decoration-1 underline-offset-4 group-hover:text-brass-text ${
+            size === "compact" ? "text-[12px]" : "text-[12.5px]"
           }`}
         >
           Learn more<span className="sr-only"> about {book.title} (opens in a new tab)</span>

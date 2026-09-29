@@ -21,7 +21,7 @@ export default function NewOnShelf({ books, preview }: { books: PublicBook[]; pr
 
   return (
     <>
-      <ul ref={listRef} className="mt-9 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 sm:gap-x-7 desk:grid-cols-4">
+      <ul ref={listRef} className="mt-7 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3 sm:gap-x-7 desk:grid-cols-4">
         {shown.map((book) => (
           <li key={book.id}>
             <BookCard book={book} size="shelf" />
