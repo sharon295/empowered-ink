@@ -347,7 +347,7 @@ export default function DirectoryClient({
         ) : (
           <ul
             aria-busy={refreshing}
-            className={`mt-6 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-6 ${
+            className={`mt-6 grid grid-cols-2 gap-x-4 gap-y-9 sm:grid-cols-3 sm:gap-x-6 desk:grid-cols-6 desk:gap-x-5 ${
               refreshing ? "opacity-50" : ""
             }`}
           >
@@ -365,7 +365,7 @@ export default function DirectoryClient({
           {loadState === "loading" && !refreshing && (
             <>
               <span className="sr-only">Loading more books</span>
-              <div aria-hidden="true" className="-mt-4 grid grid-cols-2 gap-x-4 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-6">
+              <div aria-hidden="true" className="-mt-4 grid grid-cols-2 gap-x-4 sm:grid-cols-3 sm:gap-x-6 desk:grid-cols-6 desk:gap-x-5">
                 {Array.from({ length: 6 }, (_, i) => (
                   <div key={i} className={i >= 2 ? "hidden sm:block" : ""}>
                     <div className="skeleton aspect-[2/3] bg-cover" />

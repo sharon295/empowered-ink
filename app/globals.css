@@ -15,6 +15,10 @@
   --color-cover: #ede7d8;
   --color-tint: #f3efe5;
 
+  /* Desktop layout (6 across in the A–Z list) from 820px, so it still applies
+     when the directory is embedded in a narrower column on the magazine site. */
+  --breakpoint-desk: 51.25rem;
+
   --font-display: var(--font-bodoni), "Bodoni Moda", Georgia, serif;
   --font-body: var(--font-work-sans), "Work Sans", system-ui, sans-serif;
 }
