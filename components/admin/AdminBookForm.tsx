@@ -147,7 +147,7 @@ export default function AdminBookForm({
               </button>
             )}
           </>,
-          "Featured cards show the first line. Authors can't add or change it. Save changes to apply."
+          "Featured cards show the first 75–100 characters with a Read more link. Authors can't add or change it. Save changes to apply."
         )}
         {field("email", "Author email (private)", <input id={id("email")} type="email" value={f.email} onChange={set("email")} className={inputClass(errors.email)} />)}
         {field("phone", "Author phone (private)", <input id={id("phone")} type="tel" value={f.phone} onChange={set("phone")} className={inputClass(errors.phone)} />)}
