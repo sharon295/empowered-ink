@@ -305,7 +305,7 @@ export default function DirectoryClient({
             className="mt-2 w-full max-w-xl border border-hairline bg-white px-3 py-2 text-[13px] text-ink placeholder:text-muted-text focus:border-ink focus:outline-none"
           />
 
-          <div role="group" aria-label="Filter by category" className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+          <div role="group" aria-label="Filter by category" className="mt-4 flex flex-wrap gap-1.5 sm:mt-5 sm:gap-2">
             {["", ...categories].map((c) => {
               const active = category === c;
               return (
@@ -314,7 +314,7 @@ export default function DirectoryClient({
                   type="button"
                   aria-pressed={active}
                   onClick={() => setCategory(c)}
-                  className={`shrink-0 whitespace-nowrap border px-2.5 py-1.5 text-[12px] ${
+                  className={`whitespace-nowrap border px-2.5 py-1.5 text-[12px] ${
                     active
                       ? "border-ink bg-ink text-ivory"
                       : "border-hairline bg-transparent text-soft hover:border-brass hover:text-brass-text"
