@@ -15,6 +15,15 @@ export const metadata: Metadata = {
 
 const SUBMIT_URL = process.env.NEXT_PUBLIC_SUBMIT_URL || "/book-feature-submission-form";
 
+// Shown in the "For Authors" band at the bottom of the directory.
+const CATEGORY_EMAIL = "sharon@impossiblewec.com";
+const AUTHOR_NOTES = [
+  "All submissions, featured and non-featured, run for one month.",
+  "Whichever month you submit in, your book appears in the following month’s issue.",
+  "Every book must be approved once it is submitted.",
+  "Featured submissions are $75. Once paid, a link will be sent to you to submit your book.",
+];
+
 function param(value: string | string[] | undefined): string {
   return (Array.isArray(value) ? value[0] : value)?.slice(0, 200) ?? "";
 }
@@ -86,20 +95,41 @@ export default async function EmpoweredInkPage({ searchParams }: PageProps<"/emp
       />
 
       <section className="bg-ink text-ivory">
-        <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 px-4 py-14 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-          <div>
-            <p className="label text-[12px] text-cover">For Authors</p>
-            <h2 className="font-display mt-1 text-[19px] italic leading-tight sm:text-[22px]">
-              Share your book with our community
-            </h2>
+        <div className="mx-auto max-w-[1200px] px-4 py-14 sm:px-8">
+          <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="label text-[12px] text-cover">For Authors</p>
+              <h2 className="font-display mt-1 text-[19px] italic leading-tight sm:text-[22px]">
+                Share your book with our community
+              </h2>
+            </div>
+            <a
+              href={SUBMIT_URL}
+              target="_top"
+              className="border border-ivory bg-ivory px-4 py-2 text-[12.5px] font-medium text-ink hover:border-brass hover:bg-brass hover:text-ink"
+            >
+              Submit Your Book
+            </a>
           </div>
-          <a
-            href={SUBMIT_URL}
-            target="_top"
-            className="border border-ivory bg-ivory px-4 py-2 text-[12.5px] font-medium text-ink hover:border-brass hover:bg-brass hover:text-ink"
-          >
-            Submit Your Book
-          </a>
+
+          <ul className="mt-8 grid max-w-4xl list-disc gap-x-10 gap-y-2.5 border-t border-white/15 pl-4 pt-7 text-[13px] leading-snug text-cover marker:text-brass sm:grid-cols-2">
+            {AUTHOR_NOTES.map((note) => (
+              <li key={note} className="pl-1">
+                {note}
+              </li>
+            ))}
+            <li className="pl-1">
+              If your category isn&rsquo;t listed, please choose &ldquo;Other&rdquo;. You can also email{" "}
+              <a
+                href={`mailto:${CATEGORY_EMAIL}`}
+                target="_top"
+                className="text-ivory underline decoration-1 underline-offset-4 hover:text-brass"
+              >
+                {CATEGORY_EMAIL}
+              </a>{" "}
+              to suggest a category; if we receive enough submissions for it, it will be added.
+            </li>
+          </ul>
         </div>
       </section>
     </main>
