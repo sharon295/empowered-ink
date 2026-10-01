@@ -5,9 +5,9 @@ import FeaturedDescription from "./FeaturedDescription";
 type Size = "featured" | "shelf" | "compact";
 
 const STYLES: Record<Size, { title: string; author: string; label: string; gap: string; cover: string }> = {
-  featured: { title: "text-[16px] leading-tight", author: "text-[12.5px] leading-snug", label: "text-[12px] leading-tight", gap: "gap-1", cover: "text-[16px]" },
-  shelf: { title: "text-[14px] leading-tight", author: "text-[12px] leading-snug", label: "text-[11.5px] leading-tight", gap: "gap-1", cover: "text-[14px]" },
-  compact: { title: "text-[12.5px] leading-tight", author: "text-[11.5px] leading-snug", label: "text-[11px] leading-tight", gap: "gap-0.5", cover: "text-[12px]" },
+  featured: { title: "text-[15px] leading-tight", author: "text-[12px] leading-snug", label: "text-[11.5px] leading-tight", gap: "gap-1", cover: "text-[15px]" },
+  shelf: { title: "text-[13px] leading-tight", author: "text-[11.5px] leading-snug", label: "text-[11px] leading-tight", gap: "gap-0.5", cover: "text-[13px]" },
+  compact: { title: "text-[11.5px] leading-tight", author: "text-[10.5px] leading-snug", label: "text-[10px] leading-tight", gap: "gap-0.5", cover: "text-[11px]" },
 };
 
 // The whole card is one link to the book's page, opening in a new tab.
@@ -80,7 +80,7 @@ export default function BookCard({
         <span className={`text-soft ${s.author}`}>{book.author}</span>
         <span
           className={`mt-auto pt-1 underline decoration-1 underline-offset-4 group-hover:text-brass-text ${
-            size === "compact" ? "text-[11.5px]" : "text-[12px]"
+            size === "compact" ? "text-[10.5px]" : "text-[11.5px]"
           }`}
         >
           Learn more<span className="sr-only"> about {book.title} (opens in a new tab)</span>

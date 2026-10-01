@@ -123,6 +123,8 @@ so searches can be shared, and returns the reader to the same place when they co
    - `ADMIN_PASSWORD` — password for `/admin`; optionally `ADMIN_SESSION_SECRET` to sign sessions with a
      separate secret
    - `NEXT_PUBLIC_DIRECTORY_PAGE_URL` — the magazine page that embeds the directory ("Back to the Directory")
+   - `NOTIFY_EMAIL`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — optional; when set, the
+     owner is emailed each time an author submits a book (same SMTP settings as the member directory)
 
 Any Stripe variables or webhook left over from the earlier version can be deleted; the app no longer uses them.
 

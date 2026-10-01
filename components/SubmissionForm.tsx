@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { SubmissionType } from "@/lib/submission-types";
-import CoverPreview, { COVER_SIZE_HINT } from "./CoverPreview";
+import CoverPreview, { COVER_APPROVAL_RULE, COVER_SIZE_HINT } from "./CoverPreview";
 
 const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
@@ -151,8 +151,9 @@ export default function SubmissionForm({
           onChange={handleCoverChange}
           className="block w-full text-[13px] file:mr-3 file:border file:border-ink file:bg-ink file:px-4 file:py-2 file:text-[13px] file:text-ivory"
         />
-        <p className="mt-1 text-[11.5px] leading-snug text-muted-text">{COVER_SIZE_HINT}</p>
-        <CoverPreview file={coverFile} />
+        <p className="mt-1.5 text-[12.5px] leading-snug text-soft">{COVER_SIZE_HINT}</p>
+        <p className="mt-1 text-[12.5px] font-medium leading-snug text-ink">{COVER_APPROVAL_RULE}</p>
+        <CoverPreview file={coverFile} forAuthor />
       </FormField>
 
       <FormField label="Link to Purchase" htmlFor="purchaseLink" error={errors.purchaseLink}>

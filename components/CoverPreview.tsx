@@ -5,16 +5,17 @@ import { useEffect, useState } from "react";
 // Covers are shown in a 2:3 portrait frame everywhere on the directory.
 export const COVER_WIDTH = 1200;
 export const COVER_HEIGHT = 1800;
-export const COVER_MIN_WIDTH = 600;
-export const COVER_MIN_HEIGHT = 900;
-export const COVER_SIZE_HINT = `JPG or PNG. Best size: ${COVER_WIDTH} × ${COVER_HEIGHT} pixels (portrait, 2:3 ratio — the shape of a standard book cover). At least ${COVER_MIN_WIDTH} × ${COVER_MIN_HEIGHT}.`;
+export const COVER_SIZE_HINT = `Front cover only — no 3D mockups, spines, back covers or photos of the book. It must be ${COVER_WIDTH} × ${COVER_HEIGHT} pixels (portrait), JPG or PNG.`;
+// Shown to authors only.
+export const COVER_APPROVAL_RULE = "Listings that don’t follow these image instructions will not be approved.";
 
 type Size = { width: number; height: number };
 
-// Shows the chosen cover exactly as the directory will frame it, and says so
-// plainly if the image is a different shape (it is cropped to fit) or small
-// enough to look blurry. Never blocks the upload.
-export default function CoverPreview({ file }: { file: File | null }) {
+// Shows the chosen cover exactly as the directory will frame it and says
+// plainly whether it meets the required size. It never blocks the upload:
+// the owner makes the final call when approving. `forAuthor` adds the
+// "will not be approved" wording used on the public form.
+export default function CoverPreview({ file, forAuthor = false }: { file: File | null; forAuthor?: boolean }) {
   const [url, setUrl] = useState<string | null>(null);
   const [size, setSize] = useState<Size | null>(null);
 
@@ -37,8 +38,9 @@ export default function CoverPreview({ file }: { file: File | null }) {
   if (!file || !url || !size) return null;
 
   const ratio = size.width / size.height;
-  const offShape = Math.abs(ratio - 2 / 3) > 0.04;
-  const tooSmall = size.width < COVER_MIN_WIDTH || size.height < COVER_MIN_HEIGHT;
+  const rightShape = Math.abs(ratio - COVER_WIDTH / COVER_HEIGHT) <= 0.02;
+  const bigEnough = size.width >= COVER_WIDTH && size.height >= COVER_HEIGHT;
+  const meetsRule = rightShape && bigEnough;
 
   return (
     <div className="mt-3 flex items-start gap-4">
@@ -50,19 +52,20 @@ export default function CoverPreview({ file }: { file: File | null }) {
         <p>
           This is how your cover will appear. Your image is {size.width} × {size.height} pixels.
         </p>
-        {offShape && (
-          <p className="mt-1.5 text-brass-text">
-            It isn&rsquo;t the 2:3 cover shape, so the {ratio > 2 / 3 ? "sides" : "top and bottom"} are trimmed to
-            fit. For the whole cover to show, upload an image that is {COVER_WIDTH} × {COVER_HEIGHT} pixels.
+        {meetsRule ? (
+          <p className="mt-1.5">That&rsquo;s the right size.</p>
+        ) : (
+          <p className="mt-1.5 font-medium text-red-700">
+            {rightShape
+              ? `It is smaller than the required ${COVER_WIDTH} × ${COVER_HEIGHT} pixels.`
+              : `It is not the required ${COVER_WIDTH} × ${COVER_HEIGHT} pixels, so the ${
+                  ratio > COVER_WIDTH / COVER_HEIGHT ? "sides" : "top and bottom"
+                } would be trimmed.`}{" "}
+            {forAuthor
+              ? "Please upload the front cover at the required size, or your listing will not be approved."
+              : "Replace it with a front cover at the required size."}
           </p>
         )}
-        {tooSmall && (
-          <p className="mt-1.5 text-brass-text">
-            It is smaller than {COVER_MIN_WIDTH} × {COVER_MIN_HEIGHT}, so it may look blurry. A larger image will
-            look sharper.
-          </p>
-        )}
-        {!offShape && !tooSmall && <p className="mt-1.5">That&rsquo;s the right shape and size.</p>}
       </div>
     </div>
   );

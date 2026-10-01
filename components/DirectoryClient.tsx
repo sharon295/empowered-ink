@@ -347,13 +347,13 @@ export default function DirectoryClient({
         ) : (
           <ul
             aria-busy={refreshing}
-            className={`mt-5 grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 sm:gap-x-6 desk:grid-cols-6 desk:gap-x-5 ${
+            className={`mt-5 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-4 sm:gap-x-4 desk:grid-cols-8 desk:gap-x-4 ${
               refreshing ? "opacity-50" : ""
             }`}
           >
             {books.map((book, i) => (
               <li key={book.id}>
-                <BookCard book={book} size="compact" eager={i < 6} />
+                <BookCard book={book} size="compact" eager={i < 8} />
               </li>
             ))}
           </ul>
@@ -365,9 +365,9 @@ export default function DirectoryClient({
           {loadState === "loading" && !refreshing && (
             <>
               <span className="sr-only">Loading more books</span>
-              <div aria-hidden="true" className="-mt-4 grid grid-cols-2 gap-x-4 sm:grid-cols-3 sm:gap-x-6 desk:grid-cols-6 desk:gap-x-5">
-                {Array.from({ length: 6 }, (_, i) => (
-                  <div key={i} className={i >= 2 ? "hidden sm:block" : ""}>
+              <div aria-hidden="true" className="-mt-4 grid grid-cols-2 gap-x-4 sm:grid-cols-4 sm:gap-x-4 desk:grid-cols-8 desk:gap-x-4">
+                {Array.from({ length: 8 }, (_, i) => (
+                  <div key={i} className={i >= 4 ? "hidden desk:block" : i >= 2 ? "hidden sm:block" : ""}>
                     <div className="skeleton aspect-[2/3] bg-cover" />
                     <div className="skeleton mt-3 h-3 w-2/3 bg-cover" />
                     <div className="skeleton mt-2 h-3 w-1/2 bg-cover" />
