@@ -8,6 +8,8 @@
 export type HostViewport = {
   iframeTop: number; // iframe's top edge relative to the host viewport (negative once scrolled past)
   viewportHeight: number;
+  // The iframe's current height on the host page; null from older embed.js.
+  frameHeight: number | null;
 };
 
 const SOURCE = "empowered-ink";
@@ -24,7 +26,11 @@ function ensureListening() {
     const data = event.data;
     if (!data || data.source !== HOST_SOURCE || data.type !== "viewport") return;
     if (event.source !== window.parent) return;
-    latest = { iframeTop: Number(data.iframeTop) || 0, viewportHeight: Number(data.viewportHeight) || 0 };
+    latest = {
+      iframeTop: Number(data.iframeTop) || 0,
+      viewportHeight: Number(data.viewportHeight) || 0,
+      frameHeight: typeof data.frameHeight === "number" ? data.frameHeight : null,
+    };
     for (const fn of listeners) fn(latest);
   });
 }

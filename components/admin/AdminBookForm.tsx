@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminBook } from "@/lib/admin-types";
 import PlacementFields, { placementSummary, type PlacementValue } from "./PlacementFields";
+import CoverPreview, { COVER_SIZE_HINT } from "../CoverPreview";
 
 type Errors = Record<string, string>;
 
@@ -173,7 +174,8 @@ export default function AdminBookForm({
           )}
 
         <div className="mb-4">
-          <p className="label mb-1 text-[14px] text-soft">Cover (JPG or PNG)</p>
+          <p className="label mb-1 text-[14px] text-soft">Cover</p>
+          <p className="mb-2 text-[12px] leading-snug text-muted-text">{COVER_SIZE_HINT}</p>
           {book?.coverImageUrl && !removeCover && (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={book.coverImageUrl} alt={`Current cover of ${book.title}`} className="mb-2 h-28 w-auto border border-hairline" />
@@ -191,6 +193,7 @@ export default function AdminBookForm({
               Remove the current cover
             </label>
           )}
+          <CoverPreview file={cover} />
           {errors.coverImage && <p className="mt-1 text-[12.5px] text-red-700">{errors.coverImage}</p>}
         </div>
 

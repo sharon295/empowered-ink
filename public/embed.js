@@ -38,11 +38,30 @@
   function sendViewport() {
     if (!frame.contentWindow) return;
     var rect = frame.getBoundingClientRect();
+    // frameHeight lets the directory notice the iframe isn't its content
+    // height (e.g. its first height message arrived before this script was
+    // listening) and send the height again.
     frame.contentWindow.postMessage(
-      { source: "empowered-ink-host", type: "viewport", iframeTop: rect.top, viewportHeight: window.innerHeight },
+      {
+        source: "empowered-ink-host",
+        type: "viewport",
+        iframeTop: rect.top,
+        viewportHeight: window.innerHeight,
+        frameHeight: rect.height,
+      },
       appOrigin
     );
   }
+
+  // Until the directory has reported its height once, keep announcing that
+  // this script is ready: the iframe may finish loading before or after it.
+  var sized = false;
+  var announceTries = 0;
+  var announce = setInterval(function () {
+    if (sized || ++announceTries > 120) clearInterval(announce);
+    else sendViewport();
+  }, 500);
+  sendViewport();
 
   var ticking = false;
   function onScroll() {
@@ -74,6 +93,7 @@
     if (data.source !== "empowered-ink") return;
 
     if (data.type === "height" && data.height > 0) {
+      sized = true;
       frame.style.height = data.height + "px";
       frame.style.minHeight = "0";
       if (savedScroll !== null && document.documentElement.scrollHeight >= Number(savedScroll)) {
