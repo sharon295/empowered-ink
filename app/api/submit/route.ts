@@ -4,6 +4,7 @@ import { uploadCoverImage } from "@/lib/cloudinary";
 import { submitBookSchema, ACCEPTED_IMAGE_TYPES } from "@/lib/validation";
 import { getCategoryNames } from "@/lib/categories";
 import { derivedFields } from "@/lib/normalize.mjs";
+import { sendNewSubmissionEmail } from "@/lib/email";
 import { SUBMISSION_TYPES, submissionTypeOf } from "@/lib/submission-types";
 
 // Author submissions are free and limited to the essentials: author, contact
@@ -76,6 +77,13 @@ export async function POST(req: Request) {
       })(),
     },
   });
+
+  // Let the owner know there is something to approve. Not awaited: the author
+  // shouldn't wait on the mail server, and a mail failure is only logged.
+  const proto = req.headers.get("x-forwarded-proto") ?? "https";
+  const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (host ? `${proto}://${host}` : "");
+  void sendNewSubmissionEmail(book, siteUrl);
 
   return NextResponse.json({ bookId: book.id });
 }
