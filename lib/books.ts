@@ -1,6 +1,7 @@
 import type { Book, Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 import { currentMonthKey } from "./month";
+import { sortCategoryNames } from "./category-order";
 import { foldText } from "./normalize.mjs";
 
 export const BATCH_SIZE = 24;
@@ -149,15 +150,9 @@ export async function listBooks(
   };
 }
 
-// Category buttons: every category with at least one visible book, in the
-// order set in the category manager.
+// Category buttons: every category with at least one visible book, A to Z
+// with "Other" last.
 export async function getCategoryFacets(month: string = currentMonthKey()): Promise<string[]> {
-  const [books, categories] = await Promise.all([
-    prisma.book.findMany({ where: visible(month), select: { categories: true } }),
-    prisma.category.findMany({ orderBy: [{ sortOrder: "asc" }, { name: "asc" }] }),
-  ]);
-  const used = new Set(books.flatMap((b) => b.categories));
-  const ordered = categories.map((c) => c.name).filter((name) => used.has(name));
-  const unknown = [...used].filter((name) => !ordered.includes(name)).sort((a, b) => a.localeCompare(b));
-  return [...ordered, ...unknown];
+  const books = await prisma.book.findMany({ where: visible(month), select: { categories: true } });
+  return sortCategoryNames([...new Set(books.flatMap((b) => b.categories))]);
 }
