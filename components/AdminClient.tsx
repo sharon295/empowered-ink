@@ -32,7 +32,7 @@ function SectionBadge({ book }: { book: AdminBook }) {
   }
   const month = book.placementMonth ? monthLabel(book.placementMonth) : "";
   const styles = {
-    featured: ["bg-ink text-ivory", `Featured · ${month}`],
+    featured: ["bg-plum text-ivory", `Featured · ${month}`],
     new: ["bg-brass-text text-ivory", `New on the Shelf · ${month}`],
     scheduled: [
       "border border-brass text-brass-text",
@@ -67,7 +67,7 @@ function ApproveControls({ book, currentMonth, busy, onApprove }: {
         type="button"
         disabled={busy}
         onClick={() => onApprove(placement)}
-        className="bg-ink px-4 py-2 text-[13.5px] text-ivory hover:bg-brass-text disabled:opacity-60"
+        className="bg-plum px-4 py-2 text-[13.5px] text-ivory hover:bg-brass-text disabled:opacity-60"
       >
         {book.status === "rejected" ? "Approve again" : "Approve"}
       </button>
@@ -136,7 +136,7 @@ export default function AdminClient({
             href={`/admin?status=${f.value}`}
             aria-current={status === f.value ? "page" : undefined}
             className={`border px-3.5 py-1.5 text-[13.5px] ${
-              status === f.value ? "border-ink bg-ink text-ivory" : "border-hairline text-soft hover:border-brass hover:text-brass-text"
+              status === f.value ? "border-plum bg-plum text-ivory" : "border-hairline text-soft hover:border-brass hover:text-brass-text"
             }`}
           >
             {f.label} <span className="opacity-70">({counts[f.value]})</span>

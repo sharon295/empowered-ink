@@ -149,7 +149,7 @@ export default function SubmissionForm({
           type="file"
           accept="image/png,image/jpeg"
           onChange={handleCoverChange}
-          className="block w-full text-[13px] file:mr-3 file:border file:border-ink file:bg-ink file:px-4 file:py-2 file:text-[13px] file:text-ivory"
+          className="block w-full text-[13px] file:mr-3 file:border file:border-plum file:bg-plum file:px-4 file:py-2 file:text-[13px] file:text-ivory"
         />
         <p className="mt-1.5 text-[12.5px] leading-snug text-soft">{COVER_SIZE_HINT}</p>
         <p className="mt-1 text-[12.5px] font-medium leading-snug text-ink">{COVER_APPROVAL_RULE}</p>
@@ -207,7 +207,7 @@ export default function SubmissionForm({
       <button
         type="submit"
         disabled={submitting}
-        className="w-full bg-ink px-6 py-3.5 text-center text-[14px] text-ivory hover:bg-brass-text disabled:opacity-60"
+        className="w-full bg-plum px-6 py-3.5 text-center text-[14px] text-ivory hover:bg-brass-text disabled:opacity-60"
       >
         {submitting ? "Submitting…" : "Submit Your Book"}
       </button>

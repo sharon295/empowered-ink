@@ -42,7 +42,7 @@ function CategoryRow({ row }: { row: Row }) {
             autoFocus
             className="min-w-60 flex-1 border border-hairline bg-white px-3 py-1.5 text-[14px] focus:border-ink focus:outline-none"
           />
-          <button type="submit" disabled={saving} className="bg-ink px-3.5 py-1.5 text-[13px] text-ivory disabled:opacity-60">
+          <button type="submit" disabled={saving} className="bg-plum px-3.5 py-1.5 text-[13px] text-ivory disabled:opacity-60">
             {saving ? "Saving…" : "Save"}
           </button>
           <button type="button" onClick={() => { setEditing(false); setName(row.name); setError(""); }} className="px-2 text-[13px] underline decoration-1 underline-offset-4">
@@ -106,7 +106,7 @@ export default function CategoryManager({ categories }: { categories: Row[] }) {
           onChange={(e) => setNewName(e.target.value)}
           className="min-w-60 flex-1 border border-hairline bg-white px-3 py-1.5 text-[14px] focus:border-ink focus:outline-none"
         />
-        <button type="submit" className="bg-ink px-3.5 py-1.5 text-[13px] text-ivory">Add</button>
+        <button type="submit" className="bg-plum px-3.5 py-1.5 text-[13px] text-ivory">Add</button>
         {error && <p role="alert" className="w-full text-[12.5px] text-red-700">{error}</p>}
       </form>
     </div>

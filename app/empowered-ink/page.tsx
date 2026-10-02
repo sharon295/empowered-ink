@@ -94,7 +94,7 @@ export default async function EmpoweredInkPage({ searchParams }: PageProps<"/emp
         startedAfter={Boolean(after)}
       />
 
-      <section className="bg-ink text-ivory">
+      <section className="bg-plum text-ivory">
         <div className="mx-auto max-w-[1200px] px-4 py-14 sm:px-8">
           <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div>

@@ -316,7 +316,7 @@ export default function DirectoryClient({
                   onClick={() => setCategory(c)}
                   className={`whitespace-nowrap border px-2.5 py-1.5 text-[12px] ${
                     active
-                      ? "border-ink bg-ink text-ivory"
+                      ? "border-plum bg-plum text-ivory"
                       : "border-hairline bg-transparent text-soft hover:border-brass hover:text-brass-text"
                   }`}
                 >

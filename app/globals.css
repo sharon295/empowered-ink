@@ -6,6 +6,8 @@
 @theme {
   --color-ivory: #faf8f4;
   --color-ink: #16130f;
+  /* Dark bands and solid buttons (was ink/black). */
+  --color-plum: #300a30;
   --color-brass: #a47b4c;
   --color-brass-text: #86633a;
   --color-soft: #57503f;

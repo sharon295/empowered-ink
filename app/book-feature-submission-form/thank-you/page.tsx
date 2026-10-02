@@ -25,7 +25,7 @@ export default async function ThankYouPage({ searchParams }: PageProps<"/book-fe
           <a
             href={DIRECTORY_PAGE_URL}
             target="_top"
-            className="inline-block bg-ink px-6 py-3.5 text-[14px] text-ivory hover:bg-brass-text"
+            className="inline-block bg-plum px-6 py-3.5 text-[14px] text-ivory hover:bg-brass-text"
           >
             Back to the Directory
           </a>

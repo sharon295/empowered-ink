@@ -26,7 +26,7 @@ export default async function SubmissionFormPage({ searchParams }: PageProps<"/b
       {!embedded && <SiteNav />}
       <main id="ei-root">
         <EmbedResizer />
-        <section className="bg-ink py-14 text-ivory sm:py-18">
+        <section className="bg-plum py-14 text-ivory sm:py-18">
           <div className="mx-auto max-w-2xl px-8">
             <p className="label text-[15px] text-cover">Our Author Community</p>
             <h1 className="font-display mt-2 text-[36px] italic leading-tight sm:text-[46px]">
