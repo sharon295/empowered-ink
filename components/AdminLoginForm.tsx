@@ -46,7 +46,7 @@ export default function AdminLoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-ink px-6 py-3 text-[14px] text-ivory hover:bg-brass-text disabled:opacity-60"
+          className="w-full bg-plum px-6 py-3 text-[14px] text-ivory hover:bg-brass-text disabled:opacity-60"
         >
           {loading ? "Checking…" : "Sign In"}
         </button>

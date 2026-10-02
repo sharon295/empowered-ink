@@ -185,7 +185,7 @@ export default function AdminBookForm({
             type="file"
             accept="image/png,image/jpeg"
             onChange={(e) => setCover(e.target.files?.[0] ?? null)}
-            className="block text-[13px] file:mr-3 file:border file:border-ink file:bg-ink file:px-3 file:py-1.5 file:text-[12.5px] file:text-ivory"
+            className="block text-[13px] file:mr-3 file:border file:border-plum file:bg-plum file:px-3 file:py-1.5 file:text-[12.5px] file:text-ivory"
           />
           {book?.coverImageUrl && (
             <label className="mt-2 flex items-center gap-2 text-[13px] text-soft">
@@ -222,7 +222,7 @@ export default function AdminBookForm({
       </div>
 
       <div className="md:col-span-2 flex flex-wrap items-center gap-3 border-t border-hairline pt-4">
-        <button type="submit" disabled={saving} className="bg-ink px-5 py-2.5 text-[13.5px] text-ivory hover:bg-brass-text disabled:opacity-60">
+        <button type="submit" disabled={saving} className="bg-plum px-5 py-2.5 text-[13.5px] text-ivory hover:bg-brass-text disabled:opacity-60">
           {saving ? "Saving…" : creating ? "Add book" : "Save changes"}
         </button>
         {onDone && (
